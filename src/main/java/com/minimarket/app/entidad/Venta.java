@@ -28,4 +28,7 @@ public class Venta {
 
     @OneToMany(mappedBy = "venta", cascade = CascadeType.ALL)
     private List<DetalleVenta> detalles;
+    
+    @Column(name = "numero_boleta", unique = true)
+    private String numeroBoleta;
 }
