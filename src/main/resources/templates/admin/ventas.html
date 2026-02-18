@@ -1,0 +1,88 @@
+<div th:fragment="contenido" class="space-y-6">
+
+    <!-- HEADER -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">
+               Ventas
+            </h1>
+            <p class="text-gray-600 text-lg mt-2">
+                Agrega productos y realiza la venta
+            </p>
+        </div>
+    </div>
+
+    <!-- BUSCADOR DE PRODUCTOS -->
+    <div class="bg-white rounded-2xl shadow-xl p-4">
+        <label class="font-semibold text-gray-700">Buscar producto:</label>
+        <input type="text" id="buscarProducto" placeholder="Escribe nombre del producto..."
+               class="w-full border border-gray-300 rounded-lg px-4 py-2 mt-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+        
+        <!-- LISTADO DE PRODUCTOS CON SCROLL -->
+        <div class="mt-4 max-h-36 overflow-y-auto border border-gray-200 rounded-lg">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-2 text-left text-sm font-bold text-gray-700 uppercase">Nombre</th>
+                    <th class="px-4 py-2 text-left text-sm font-bold text-gray-700 uppercase">Precio</th>
+                    <th class="px-4 py-2 text-left text-sm font-bold text-gray-700 uppercase">Stock</th>
+                    <th class="px-4 py-2 text-center text-sm font-bold text-gray-700 uppercase">Acción</th>
+                </tr>
+                </thead>
+                <tbody id="listaProductos" class="divide-y divide-gray-100">
+                    <!-- Aquí se insertan los productos filtrados dinámicamente -->
+                    <tr th:each="producto : ${productos}" class="hover:bg-gray-50">
+                        <td class="px-4 py-2 font-medium" th:text="${producto.nombre}"></td>
+                        <td class="px-4 py-2 font-bold text-green-600"
+                            th:text="'S/ ' + ${#numbers.formatDecimal(producto.precio, 1 , 2)}">
+                        </td>
+                        <td class="px-4 py-2">
+                            <span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-sm font-semibold"
+                                  th:text="${producto.stockActual}">
+                            </span>
+                        </td>
+                        <td class="px-4 py-2 text-center">
+                            <button type="button"
+                                    class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-sm"
+                                    th:attr="data-id=${producto.id}" onclick="agregarProducto(this)">
+                                Agregar
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- TABLA DE VENTA ACTUAL -->
+    <div class="bg-white rounded-2xl shadow-xl p-4 mt-4">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">Venta actual</h2>
+        <div class="overflow-x-auto">
+            <table id="tablaVentaActual" class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-2 text-left text-sm font-bold text-gray-700 uppercase">Producto</th>
+                    <th class="px-4 py-2 text-left text-sm font-bold text-gray-700 uppercase">Cantidad</th>
+                    <th class="px-4 py-2 text-left text-sm font-bold text-gray-700 uppercase">Precio Unit.</th>
+                    <th class="px-4 py-2 text-left text-sm font-bold text-gray-700 uppercase">Subtotal</th>
+                    <th class="px-4 py-2 text-center text-sm font-bold text-gray-700 uppercase">Eliminar</th>
+                </tr>
+                </thead>
+                <tbody id="cuerpoVenta">
+                    <!-- Los productos agregados aparecerán aquí -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TOTAL Y BOTÓN -->
+        <div class="flex justify-end items-center mt-4 space-x-6">
+            <span class="text-xl font-bold text-gray-800">Total: S/ <span id="totalVenta">0.00</span></span>
+            <button type="button" 
+                    class="bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg font-semibold"
+                    onclick="confirmarVenta()">
+                Confirmar Venta
+            </button>
+        </div>
+    </div>
+
+</div>
