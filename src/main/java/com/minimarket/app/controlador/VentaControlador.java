@@ -1,12 +1,17 @@
 package com.minimarket.app.controlador;
 
+import com.minimarket.app.entidad.DetalleVenta;
+import com.minimarket.app.entidad.Producto;
+import com.minimarket.app.entidad.Usuario;
 import com.minimarket.app.entidad.Venta;
+import com.minimarket.app.entidad.VentaDTO;
 //import com.minimarket.app.entidad.Producto;
 //import com.minimarket.app.entidad.DetalleVenta;
 //import com.minimarket.app.entidad.Usuario;
 import com.minimarket.app.servicio.VentaServicio;
 import com.minimarket.app.servicio.ProductoServicio;
 //import com.minimarket.app.servicio.UsuarioServicio;
+import com.minimarket.app.servicio.UsuarioServicio;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -16,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("admin/ventas")
@@ -26,9 +32,12 @@ public class VentaControlador {
 
     @Autowired
     private ProductoServicio productoServicio;
+    
+    @Autowired
+    private UsuarioServicio usuarioServicio;
+   
 
-  //  @Autowired
-   // private UsuarioServicio usuarioServicio;
+ 
 
     
     // LISTAR VENTAS / VENTANA DE VENTA
@@ -55,6 +64,27 @@ public class VentaControlador {
         redirectAttributes.addFlashAttribute("success", "Venta registrada correctamente");
 
         return "redirect:/admin/ventas";
+    }
+    
+ // NUEVO: GUARDAR VENTA DESDE FRONT-END CON DTO (JSON)
+    @ResponseBody
+    @PostMapping("/crear")
+    public Venta crearVenta(@RequestBody VentaDTO ventaDTO) {
+        // 1️⃣ Obtener el usuario completo desde el ID
+        Usuario usuario = usuarioServicio.buscarPorId(ventaDTO.getUsuarioId());
+
+        // 2️⃣ Mapear los DetalleVentaDTO a DetalleVenta real
+        List<DetalleVenta> detallesEntidad = ventaDTO.getDetalles().stream().map(dto -> {
+            DetalleVenta dv = new DetalleVenta();
+            Producto producto = productoServicio.buscarPorId(dto.getIdProducto()); // trae el producto real
+            dv.setProducto(producto);
+            dv.setCantidad(dto.getCantidad());
+            dv.setPrecioUnitario(producto.getPrecio()); // Precio unitario desde Producto
+            return dv;
+        }).collect(Collectors.toList());
+
+        //Llamar al servicio que valida stock, calcula total, asigna boleta y guarda
+        return ventaServicio.crearVentaConDetails(detallesEntidad, usuario);
     }
 
     

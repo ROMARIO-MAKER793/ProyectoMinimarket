@@ -238,6 +238,122 @@ const userForm = document.getElementById('userForm');
 
 });
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    // ✅ Solo si existen los elementos necesarios
+    const inputBuscar = document.getElementById('buscarProducto');
+    const listaProductos = document.getElementById('listaProductos');
+    const cuerpoVenta = document.getElementById('cuerpoVenta');
+    const totalVentaSpan = document.getElementById('totalVenta');
+
+    if (!inputBuscar || !listaProductos || !cuerpoVenta || !totalVentaSpan) return;
+
+    let productosDisponibles = [];
+    let productosEnVenta = [];
+
+    // Inicializar productos desde la tabla (solo nombre, precio, stock y id)
+    listaProductos.querySelectorAll('tr').forEach(tr => {
+        const id = tr.querySelector('button').dataset.id;
+        const nombre = tr.children[0].textContent.trim();
+        const precio = parseFloat(tr.children[1].textContent.replace('S/ ', ''));
+        const stock = parseInt(tr.children[2].textContent.trim());
+        productosDisponibles.push({ id, nombre, precio, stock });
+    });
+
+    // Filtrar productos dinámicamente mientras escribes
+    inputBuscar.addEventListener('input', () => {
+        const texto = inputBuscar.value.trim().toLowerCase();
+        listaProductos.querySelectorAll('tr').forEach(tr => tr.style.display = 'none');
+
+        productosDisponibles.forEach((producto, index) => {
+            if (producto.nombre.toLowerCase().includes(texto)) {
+                listaProductos.querySelectorAll('tr')[index].style.display = '';
+            }
+        });
+    });
+
+    // Función para agregar producto a venta actual
+    window.agregarProducto = (btn) => {
+        const id = btn.dataset.id;
+        const producto = productosDisponibles.find(p => p.id === id);
+
+        if (!producto) return;
+
+        // Verificar si ya está en la venta
+        let prodExistente = productosEnVenta.find(p => p.id === id);
+        if (prodExistente) {
+            prodExistente.cantidad += 1;
+        } else {
+            productosEnVenta.push({ ...producto, cantidad: 1 });
+        }
+
+        renderizarTablaVenta();
+    };
+
+    // Renderizar tabla de venta actual
+    function renderizarTablaVenta() {
+        cuerpoVenta.innerHTML = '';
+        let total = 0;
+
+        productosEnVenta.forEach((prod, index) => {
+            const subtotal = prod.precio * prod.cantidad;
+            total += subtotal;
+
+            const tr = document.createElement('tr');
+
+            tr.innerHTML = `
+                <td class="px-4 py-2">${prod.nombre}</td>
+                <td class="px-4 py-2">
+                    <input type="number" min="1" value="${prod.cantidad}" 
+                           class="w-16 border border-gray-300 rounded px-2 py-1"
+                           onchange="actualizarCantidad(${index}, this.value)">
+                </td>
+                <td class="px-4 py-2">S/ ${prod.precio.toFixed(2)}</td>
+                <td class="px-4 py-2">S/ ${subtotal.toFixed(2)}</td>
+                <td class="px-4 py-2 text-center">
+                    <button type="button" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm"
+                            onclick="eliminarProducto(${index})">X</button>
+                </td>
+            `;
+            cuerpoVenta.appendChild(tr);
+        });
+
+        totalVentaSpan.textContent = total.toFixed(2);
+    }
+
+    // Actualizar cantidad de un producto
+    window.actualizarCantidad = (index, cantidad) => {
+        cantidad = parseInt(cantidad);
+        if (cantidad < 1) cantidad = 1;
+        productosEnVenta[index].cantidad = cantidad;
+        renderizarTablaVenta();
+    };
+
+    // Eliminar producto de la venta
+    window.eliminarProducto = (index) => {
+        productosEnVenta.splice(index, 1);
+        renderizarTablaVenta();
+    };
+
+    // Confirmar venta
+    window.confirmarVenta = () => {
+        if (productosEnVenta.length === 0) {
+            alert('No hay productos para realizar la venta.');
+            return;
+        }
+
+        if (confirm('¿Seguro quieres confirmar la venta?')) {
+            // Aquí llamarías a tu endpoint del backend con fetch o Ajax
+            // Por ejemplo: enviar productosEnVenta y totalVentaSpan.textContent
+            console.log('Venta confirmada', productosEnVenta);
+
+            // Limpiar tabla de venta
+            productosEnVenta = [];
+            renderizarTablaVenta();
+            alert('¡Venta realizada con éxito!');
+        }
+    };
+});
 		//FIN SCRIPT USUARIOS
 </script>
 
