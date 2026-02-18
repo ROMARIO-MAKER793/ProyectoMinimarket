@@ -97,5 +97,13 @@ public class ProductoServicioImpl implements ProductoServicio {
         return esNuevo;
     }
 
+	@Override
+	public boolean actualizarStock(Producto producto) {
+		if(producto == null) return false;
+		productoRepositorio.save(producto);
+		
+		return true;
+	}
+
 	
 }

@@ -24,4 +24,6 @@ public interface ProductoServicio {
 
     // Eliminar producto por ID
     void eliminar(Long id);
+    
+    boolean actualizarStock(Producto producto);
 }
