@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Admin</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Bootstrap Icons SOLO iconos -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- SweetAlert -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6f9;
+        }
+    </style>
+</head>
+<body>
+
+<div class="flex min-h-screen">
+
+    <!-- SIDEBAR -->
+    <div th:replace="~{layaout/sidebar :: sidebar}"></div>
+
+    <!-- CONTENIDO -->
+    <main class="flex-1 p-6">
+        <div th:replace="~{${content} :: contenido}"></div>
+    </main>
+
+</div>
+
+<!-- JS CRUD -->
+<script>
+	
+
+
+function openModal() {
+    const modal = document.getElementById('productModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+}
+
+function closeModal() {
+    const modal = document.getElementById('productModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+function prepareCreate(){
+    document.getElementById('modalTitle').innerText = 'Nuevo Producto';
+    document.getElementById('productForm').reset();
+    document.getElementById('productId').value = '';
+	
+	// Limpiar preview de imagen
+	 const imagenPreview = document.getElementById('imagenPreview'); 
+	 if (imagenPreview) {
+	     imagenPreview.src = '';          // limpia la imagen
+	     imagenPreview.classList.add('hidden'); // oculta la img
+	 }
+
+    openModal();
+}
+
+function prepareEdit(id,nombre,precio,stockActual,categoriaId,marcaId,descripcion,imagenUrl){
+    document.getElementById('modalTitle').innerText = 'Editar Producto';
+    document.getElementById('productId').value = id;
+    document.getElementById('nombre').value = nombre;
+    document.getElementById('precio').value = precio;
+    document.getElementById('stockActual').value = stockActual;
+    document.getElementById('categoria').value = categoriaId;
+	document.getElementById('marca').value = marcaId;
+	document.getElementById('descripcion').value = descripcion;
+	
+	
+	// Mostrar la imagen actual si existe
+	const imagenPreview = document.getElementById("imagenPreview");
+	if (imagenUrl && imagenPreview) {
+	    imagenPreview.src = imagenUrl;
+		
+	    imagenPreview.style.display = 'block';
+	} else if(imagenPreview) {
+	    imagenPreview.style.display = 'none';
+	}
+	
+    openModal();
+}
+
+function confirmDelete(id){
+    Swal.fire({
+        title: '¿Eliminar producto?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'Sí, eliminar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '/admin/productos/eliminar/' + id;
+        }
+    });
+}
+
+const productForm = document.getElementById("productForm");
+
+if(productForm){productForm.addEventListener("submit", function(e) {
+
+
+    let nombre = document.getElementById("nombre").value.trim();
+    let precio = parseFloat(document.getElementById("precio").value);
+    let stock = parseInt(document.getElementById("stockActual").value);
+    let categoria = document.getElementById("categoria").value;
+    let marca = document.getElementById("marca").value;
+
+    if(nombre === ""){
+        e.preventDefault();
+        Swal.fire("El nombre es obligatorio");
+        return;
+    }
+
+    if(isNaN(precio) || precio <= 0){
+        e.preventDefault();
+        Swal.fire("El precio debe ser mayor a 0");
+        return;
+    }
+
+    if(isNaN(stock) || stock < 20){
+        e.preventDefault();
+        Swal.fire("El stock mínimo deber ser 20");
+        return;
+    }
+
+    if(categoria === ""){
+        e.preventDefault();
+        Swal.fire("Debe seleccionar una categoría");
+        return;
+    }
+
+    if(marca === ""){
+        e.preventDefault();
+        Swal.fire("Debe seleccionar una marca");
+        return;
+    }
+
+});
+}
+
+// PREPARAR CREAR USUARIOS
+function prepareCreateUser() {
+    document.getElementById('modalTitleUser').innerText = 'Nuevo Usuario';
+    document.getElementById('userForm').reset();
+    document.getElementById('userId').value = '';
+    document.getElementById('userModal').classList.remove('hidden');
+}
+
+// PREPARAR EDITAR
+function prepareEditUser(id, usuario, habilitado, rolId) {
+    document.getElementById('modalTitleUser').innerText = 'Editar Usuario';
+    document.getElementById('userId').value = id;
+    document.getElementById('usuario').value = usuario;
+    document.getElementById('habilitado').value = habilitado;
+    document.getElementById('roles').value = rolId; // asigna el select al rol actual
+    document.getElementById('contrasena').value = ''; // vacío, solo placeholder
+    document.getElementById('confirmarContrasena').value = ''; // también vacío
+    document.getElementById('userModal').classList.remove('hidden');
+}
+
+// CERRAR MODAL
+function closeUserModal() {
+    document.getElementById('userModal').classList.add('hidden');
+}
+
+// CONFIRMAR ELIMINAR
+function confirmDeleteUser(id) {
+    Swal.fire({
+        title: '¿Desea eliminar este usuario?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = '/admin/usuarios/eliminar/' + id;
+        }
+    });
+}
+
+// VALIDAR FORMULARIO CON SWEETALERT2
+const userForm = document.getElementById('userForm');
+
+	if(userForm){userForm.addEventListener('submit', function (e) {
+
+    let usuario = document.getElementById('usuario').value.trim();
+    let pass = document.getElementById('contrasena').value;
+    let confirmPass = document.getElementById('confirmarContrasena').value;
+	
+	
+    let rol = document.getElementById('roles').value;
+
+    if (!usuario) {
+        e.preventDefault();
+        Swal.fire('Error', 'El nombre de usuario es obligatorio', 'error');
+        return;
+    }
+
+    if (!rol) {
+        e.preventDefault();
+        Swal.fire('Error', 'Seleccione un rol', 'error');
+        return;
+    }
+
+    if (!pass) {
+        e.preventDefault();
+        Swal.fire('Error', 'La contraseña es obligatoria', 'error');
+        return;
+    }
+	
+	console.log("comparando:", pass, confirmPass);
+    if (!confirmPass) {
+        e.preventDefault();
+        Swal.fire('Error', 'Debe confirmar la contraseña', 'error');
+        return;
+    }
+
+    if (pass !== confirmPass) {
+        e.preventDefault();
+        Swal.fire('Error', 'Las contraseñas no coinciden', 'error');
+        return;
+    }
+
+});
+}
+		//FIN SCRIPT USUARIOS
+</script>
+
+<script>
+    function confirmarLogout() {
+        Swal.fire({
+            title: '¿Cerrar sesión?',
+            text: "Tu sesión actual se cerrará.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc2626',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Sí, cerrar sesión',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                document.getElementById('logoutForm').submit();
+            }
+        });
+    }
+</script>
+
+<script th:if="${success}">
+    Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: '[[${success}]]',
+        confirmButtonColor: '#4f46e5',
+        confirmButtonText: 'OK'
+    });
+</script>
+
+</body>
+</html>
