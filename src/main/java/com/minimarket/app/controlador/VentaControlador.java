@@ -1,10 +1,14 @@
 package com.minimarket.app.controlador;
 
 import com.minimarket.app.entidad.DetalleVenta;
+import com.minimarket.app.entidad.DetalleVentaDTO;
 import com.minimarket.app.entidad.Producto;
 import com.minimarket.app.entidad.Usuario;
 import com.minimarket.app.entidad.Venta;
 import com.minimarket.app.entidad.VentaDTO;
+import com.minimarket.app.repositorio.DetalleVentaRepositorio;
+import com.minimarket.app.repositorio.ProductoRepositorio;
+import com.minimarket.app.repositorio.VentaRepositorio;
 //import com.minimarket.app.entidad.Producto;
 //import com.minimarket.app.entidad.DetalleVenta;
 //import com.minimarket.app.entidad.Usuario;
@@ -14,14 +18,17 @@ import com.minimarket.app.servicio.ProductoServicio;
 import com.minimarket.app.servicio.UsuarioServicio;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+
 
 @Controller
 @RequestMapping("admin/ventas")
@@ -35,7 +42,15 @@ public class VentaControlador {
     
     @Autowired
     private UsuarioServicio usuarioServicio;
+    
+    @Autowired
+    private VentaRepositorio ventaRepositorio;
    
+    @Autowired
+    private ProductoRepositorio productoRepositorio;
+    
+    @Autowired
+    private DetalleVentaRepositorio detalleVentaRepositorio;
 
  
 
@@ -43,9 +58,10 @@ public class VentaControlador {
     // LISTAR VENTAS / VENTANA DE VENTA
    
     @GetMapping
-    public String listar(Model model) {
+    public String listar(Model model, @AuthenticationPrincipal Usuario usuarioLogueado) {
         model.addAttribute("productos", productoServicio.listarActivos()); // productos para vender
         model.addAttribute("venta", new Venta());
+        model.addAttribute("usuarioId", usuarioLogueado.getId());
         model.addAttribute("content", "admin/ventas"); // indica el fragment a cargar
         return "layaout/admin_layaout"; 
     }
@@ -67,24 +83,53 @@ public class VentaControlador {
     }
     
  // NUEVO: GUARDAR VENTA DESDE FRONT-END CON DTO (JSON)
-    @ResponseBody
     @PostMapping("/crear")
-    public Venta crearVenta(@RequestBody VentaDTO ventaDTO) {
-        // 1️⃣ Obtener el usuario completo desde el ID
-        Usuario usuario = usuarioServicio.buscarPorId(ventaDTO.getUsuarioId());
+    @ResponseBody
+    public Map<String, Object> crearVenta(@RequestBody VentaDTO ventaDTO) {
+        Map<String, Object> respuesta = new HashMap<>();
+        
+        try {
+            // 1️⃣ Crear la venta principal
+            Venta venta = new Venta();
+            venta.setUsuario(usuarioServicio.buscarPorId(ventaDTO.getUsuarioId())); // Asegúrate de tener el service
+            venta.setFecha(LocalDateTime.now());
+            venta.setTotal(ventaDTO.getDetalles().stream()
+                            .mapToDouble(d -> d.getCantidad() * d.getPrecioUnitario())
+                            .sum());
 
-        // 2️⃣ Mapear los DetalleVentaDTO a DetalleVenta real
-        List<DetalleVenta> detallesEntidad = ventaDTO.getDetalles().stream().map(dto -> {
-            DetalleVenta dv = new DetalleVenta();
-            Producto producto = productoServicio.buscarPorId(dto.getIdProducto()); // trae el producto real
-            dv.setProducto(producto);
-            dv.setCantidad(dto.getCantidad());
-            dv.setPrecioUnitario(producto.getPrecio()); // Precio unitario desde Producto
-            return dv;
-        }).collect(Collectors.toList());
+            // Guardar venta primero para tener ID
+            ventaRepositorio.save(venta);
 
-        //Llamar al servicio que valida stock, calcula total, asigna boleta y guarda
-        return ventaServicio.crearVentaConDetails(detallesEntidad, usuario);
+            // 2️⃣ Crear los detalles de venta
+            for (DetalleVentaDTO detalleDTO : ventaDTO.getDetalles()) {
+                Producto producto = productoRepositorio.findById(detalleDTO.getIdProducto())
+                                        .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+                // Crear detalle
+                DetalleVenta detalle = new DetalleVenta();
+                detalle.setVenta(venta);
+                detalle.setProducto(producto);
+                detalle.setCantidad(detalleDTO.getCantidad());
+                detalle.setPrecioUnitario(detalleDTO.getPrecioUnitario());
+                detalle.setSubtotal(detalleDTO.getCantidad() * detalleDTO.getPrecioUnitario());
+
+                detalleVentaRepositorio.save(detalle);
+
+                // Descontar stock
+                producto.setStockActual(producto.getStockActual() - detalleDTO.getCantidad());
+                productoRepositorio.save(producto);
+            }
+
+            // 3️⃣ Respuesta simple al frontend
+            respuesta.put("idVenta", venta.getId());
+            respuesta.put("mensaje", "¡Venta creada correctamente!");
+            return respuesta;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            respuesta.put("error", "Ocurrió un error al guardar la venta: " + e.getMessage());
+            return respuesta;
+        }
     }
 
     

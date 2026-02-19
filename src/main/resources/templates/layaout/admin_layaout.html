@@ -335,26 +335,105 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarTablaVenta();
     };
 
-    // Confirmar venta
-    window.confirmarVenta = () => {
-        if (productosEnVenta.length === 0) {
-            alert('No hay productos para realizar la venta.');
-            return;
-        }
+	
+	// Confirmar venta con SweetAlert y envío al backend con CSRF
+	window.confirmarVenta = async () => {
+	    if (productosEnVenta.length === 0) {
+	        Swal.fire({
+	            icon: 'warning',
+	            title: 'Atención',
+	            text: 'No hay productos para realizar la venta'
+	        });
+	        return;
+	    }
 
-        if (confirm('¿Seguro quieres confirmar la venta?')) {
-            // Aquí llamarías a tu endpoint del backend con fetch o Ajax
-            // Por ejemplo: enviar productosEnVenta y totalVentaSpan.textContent
-            console.log('Venta confirmada', productosEnVenta);
+	    // Confirmación con SweetAlert
+	    const { isConfirmed } = await Swal.fire({
+	        title: '¿Seguro quieres confirmar la venta?',
+	        icon: 'question',
+	        showCancelButton: true,
+	        confirmButtonText: 'Sí, confirmar',
+	        cancelButtonText: 'Cancelar'
+	    });
 
-            // Limpiar tabla de venta
-            productosEnVenta = [];
-            renderizarTablaVenta();
-            alert('¡Venta realizada con éxito!');
-        }
-    };
+	    if (!isConfirmed) return;
+
+	    // Tomar el usuario (input oculto)
+	    const usuarioIdInput = document.getElementById('usuarioIdInput');
+	    const usuarioId = parseInt(usuarioIdInput.value);
+
+	    // Preparar el DTO de la venta
+	    const ventaDTO = {
+	        usuarioId: usuarioId,
+	        detalles: productosEnVenta.map(p => ({
+	            idProducto: parseInt(p.id),
+	            nombreProducto: p.nombre,
+	            cantidad: p.cantidad,
+	            precioUnitario: p.precio,
+	            subtotal: p.precio * p.cantidad
+	        }))
+	    };
+
+	    // Capturar token CSRF (de tu input oculto en Thymeleaf)
+	    const csrfTokenInput = document.querySelector('input[name="_csrf"]');
+	    const csrfHeaderInput = document.querySelector('input[name="_csrf_header"]');
+	    const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+	    const csrfHeader = csrfHeaderInput ? csrfHeaderInput.value : 'X-CSRF-TOKEN';
+
+	    try {
+	        const response = await fetch('/admin/ventas/crear', {
+	            method: 'POST',
+	            headers: {
+	                'Content-Type': 'application/json',
+	                [csrfHeader]: csrfToken // <--- Token CSRF
+	            },
+	            body: JSON.stringify(ventaDTO)
+	        });
+
+	        if (!response.ok) throw new Error('Error al guardar la venta');
+
+			
+			// Actualizar stock en la tabla de productos al vuelo
+			// Solo si existen detalles en la respuesta
+			
+			const data = await response.json();
+			console.log('Respuesta del Backend:',data);
+			
+			productosEnVenta.forEach(det => {
+			    const trProducto = listaProductos.querySelector(`button[data-id="${det.id}"`)?.closest('tr');
+			    if (trProducto) {
+			        const spanStock = trProducto.querySelector('span');
+			        if (spanStock) {
+			            let stockActual = parseInt(spanStock.textContent.trim()) || 0;
+			            spanStock.textContent = (stockActual - det.cantidad).toString();
+			        }
+			    }
+			});
+			// --- FIN NUEVO CÓDIGO ---
+
+	        // Limpiar tabla de venta
+	        productosEnVenta = [];
+	        renderizarTablaVenta();
+
+	        // Alerta de éxito con SweetAlert
+	        Swal.fire({
+	            icon: 'success',
+	            title: '¡Venta realizada correctamente!',
+	            confirmButtonText: 'OK'
+	        });
+
+	    } catch (error) {
+	        console.error(error);
+	        Swal.fire({
+	            icon: 'error',
+	            title: 'Error',
+	            text: 'Ocurrió un error al realizar la venta. Revisa la consola.'
+	        });
+	    }
+	};
 });
-		//FIN SCRIPT USUARIOS
+
+		//FIN SCRIPT 
 </script>
 
 <script>

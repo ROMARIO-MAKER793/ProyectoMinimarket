@@ -11,6 +11,11 @@
             </p>
         </div>
     </div>
+	
+	<input type="hidden" id="usuarioIdInput" th:value="${usuarioId}">
+	
+	<input type="hidden" name="_csrf" th:value="${_csrf.token}">
+	<input type="hidden" name="_csrf_header" th:value="${_csrf.headerName}">
 
     <!-- BUSCADOR DE PRODUCTOS -->
     <div class="bg-white rounded-2xl shadow-xl p-4">
