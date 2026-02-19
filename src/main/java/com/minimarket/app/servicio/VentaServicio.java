@@ -1,13 +1,15 @@
 package com.minimarket.app.servicio;
 
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
 import com.minimarket.app.entidad.Venta;
-import com.minimarket.app.entidad.Usuario;
+import com.minimarket.app.entidad.VentaDTO;
+
 import com.minimarket.app.entidad.Producto;
-import com.minimarket.app.entidad.DetalleVenta;
+
 
 public interface VentaServicio {
 	
@@ -26,6 +28,8 @@ public interface VentaServicio {
     //Validar si los productos tiene suficiente stock
     boolean validarStock(Map<Producto , Integer> items);
     
-    //Crear una venta con detalles, calcula total, descuenta stock y asigna numero de boleta
-    Venta crearVentaConDetails(List<DetalleVenta> detalles, Usuario usuario);
+  //Crear con toda la logica
+    Map<String, Object> crearVentaDTO(VentaDTO ventaDTO) throws IOException;
+    
+    
 }

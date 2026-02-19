@@ -9,12 +9,10 @@ import com.minimarket.app.entidad.VentaDTO;
 import com.minimarket.app.repositorio.DetalleVentaRepositorio;
 import com.minimarket.app.repositorio.ProductoRepositorio;
 import com.minimarket.app.repositorio.VentaRepositorio;
-//import com.minimarket.app.entidad.Producto;
-//import com.minimarket.app.entidad.DetalleVenta;
-//import com.minimarket.app.entidad.Usuario;
+
 import com.minimarket.app.servicio.VentaServicio;
 import com.minimarket.app.servicio.ProductoServicio;
-//import com.minimarket.app.servicio.UsuarioServicio;
+
 import com.minimarket.app.servicio.UsuarioServicio;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,49 +80,15 @@ public class VentaControlador {
         return "redirect:/admin/ventas";
     }
     
- // NUEVO: GUARDAR VENTA DESDE FRONT-END CON DTO (JSON)
+ // NUEVO: GUARDAR VENTA DESDE FRONT-END CON DTO (JSON) CON VALIDACIÓN DE STOCK
     @PostMapping("/crear")
     @ResponseBody
     public Map<String, Object> crearVenta(@RequestBody VentaDTO ventaDTO) {
         Map<String, Object> respuesta = new HashMap<>();
-        
         try {
-            // 1️⃣ Crear la venta principal
-            Venta venta = new Venta();
-            venta.setUsuario(usuarioServicio.buscarPorId(ventaDTO.getUsuarioId())); // Asegúrate de tener el service
-            venta.setFecha(LocalDateTime.now());
-            venta.setTotal(ventaDTO.getDetalles().stream()
-                            .mapToDouble(d -> d.getCantidad() * d.getPrecioUnitario())
-                            .sum());
-
-            // Guardar venta primero para tener ID
-            ventaRepositorio.save(venta);
-
-            // 2️⃣ Crear los detalles de venta
-            for (DetalleVentaDTO detalleDTO : ventaDTO.getDetalles()) {
-                Producto producto = productoRepositorio.findById(detalleDTO.getIdProducto())
-                                        .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
-
-                // Crear detalle
-                DetalleVenta detalle = new DetalleVenta();
-                detalle.setVenta(venta);
-                detalle.setProducto(producto);
-                detalle.setCantidad(detalleDTO.getCantidad());
-                detalle.setPrecioUnitario(detalleDTO.getPrecioUnitario());
-                detalle.setSubtotal(detalleDTO.getCantidad() * detalleDTO.getPrecioUnitario());
-
-                detalleVentaRepositorio.save(detalle);
-
-                // Descontar stock
-                producto.setStockActual(producto.getStockActual() - detalleDTO.getCantidad());
-                productoRepositorio.save(producto);
-            }
-
-            // 3️⃣ Respuesta simple al frontend
-            respuesta.put("idVenta", venta.getId());
-            respuesta.put("mensaje", "¡Venta creada correctamente!");
-            return respuesta;
-
+            // Llamada al servicio que maneja toda la lógica
+            Map<String, Object> resultado = ventaServicio.crearVentaDTO(ventaDTO);
+            return resultado;
         } catch (Exception e) {
             e.printStackTrace();
             respuesta.put("error", "Ocurrió un error al guardar la venta: " + e.getMessage());

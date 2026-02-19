@@ -2,7 +2,9 @@ package com.minimarket.app.servicio;
 
 import java.util.List;
 
+
 import com.minimarket.app.entidad.Usuario;
+
 
 public interface UsuarioServicio {
 	
@@ -23,6 +25,8 @@ public interface UsuarioServicio {
 
     //Verifica si la contraseña coincide con el hash
     boolean verificarContrasena(String textoPlano, String hash);
+    
+    
     	
     
     

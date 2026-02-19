@@ -239,8 +239,9 @@ const userForm = document.getElementById('userForm');
 });
 }
 
+//Script para venta
+
 document.addEventListener('DOMContentLoaded', () => {
-    // ✅ Solo si existen los elementos necesarios
     const inputBuscar = document.getElementById('buscarProducto');
     const listaProductos = document.getElementById('listaProductos');
     const cuerpoVenta = document.getElementById('cuerpoVenta');
@@ -251,20 +252,21 @@ document.addEventListener('DOMContentLoaded', () => {
     let productosDisponibles = [];
     let productosEnVenta = [];
 
-    // Inicializar productos desde la tabla (solo nombre, precio, stock y id)
+    // Inicializar productos desde la tabla
     listaProductos.querySelectorAll('tr').forEach(tr => {
-        const id = tr.querySelector('button').dataset.id;
+        const btn = tr.querySelector('button');
+        const id = btn.dataset.id;
         const nombre = tr.children[0].textContent.trim();
         const precio = parseFloat(tr.children[1].textContent.replace('S/ ', ''));
         const stock = parseInt(tr.children[2].textContent.trim());
-        productosDisponibles.push({ id, nombre, precio, stock });
+        const stockMinimo = 20; // Cambiar si quieres dinámico
+        productosDisponibles.push({ id, nombre, precio, stock, stockMinimo });
     });
 
-    // Filtrar productos dinámicamente mientras escribes
+    // Filtrar productos dinámicamente
     inputBuscar.addEventListener('input', () => {
         const texto = inputBuscar.value.trim().toLowerCase();
         listaProductos.querySelectorAll('tr').forEach(tr => tr.style.display = 'none');
-
         productosDisponibles.forEach((producto, index) => {
             if (producto.nombre.toLowerCase().includes(texto)) {
                 listaProductos.querySelectorAll('tr')[index].style.display = '';
@@ -272,59 +274,91 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Función para agregar producto a venta actual
+    // Función agregar producto
     window.agregarProducto = (btn) => {
         const id = btn.dataset.id;
         const producto = productosDisponibles.find(p => p.id === id);
-
         if (!producto) return;
 
-        // Verificar si ya está en la venta
         let prodExistente = productosEnVenta.find(p => p.id === id);
         if (prodExistente) {
-            prodExistente.cantidad += 1;
+            // Solo aumentar si no supera stock
+            if (prodExistente.cantidad < producto.stock) prodExistente.cantidad += 1;
         } else {
             productosEnVenta.push({ ...producto, cantidad: 1 });
         }
 
         renderizarTablaVenta();
     };
+	
+	//Renderizar Tabla al realizar una venta
 
-    // Renderizar tabla de venta actual
-    function renderizarTablaVenta() {
-        cuerpoVenta.innerHTML = '';
-        let total = 0;
+	function renderizarTablaVenta() {
+	    cuerpoVenta.innerHTML = '';
+	    let total = 0;
 
-        productosEnVenta.forEach((prod, index) => {
-            const subtotal = prod.precio * prod.cantidad;
-            total += subtotal;
+	    productosEnVenta.forEach((prod, index) => {
+	        const subtotal = prod.precio * prod.cantidad;
+	        total += subtotal;
 
-            const tr = document.createElement('tr');
+	        const tr = document.createElement('tr');
 
-            tr.innerHTML = `
-                <td class="px-4 py-2">${prod.nombre}</td>
-                <td class="px-4 py-2">
-                    <input type="number" min="1" value="${prod.cantidad}" 
-                           class="w-16 border border-gray-300 rounded px-2 py-1"
-                           onchange="actualizarCantidad(${index}, this.value)">
-                </td>
-                <td class="px-4 py-2">S/ ${prod.precio.toFixed(2)}</td>
-                <td class="px-4 py-2">S/ ${subtotal.toFixed(2)}</td>
-                <td class="px-4 py-2 text-center">
-                    <button type="button" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm"
-                            onclick="eliminarProducto(${index})">X</button>
-                </td>
-            `;
-            cuerpoVenta.appendChild(tr);
-        });
+	        // Nombre del producto
+	        const tdNombre = document.createElement('td');
+	        tdNombre.className = 'px-4 py-2 font-medium text-gray-900';
+	        tdNombre.textContent = prod.nombre;
 
-        totalVentaSpan.textContent = total.toFixed(2);
-    }
+	        // Cantidad con input
+	        const tdCantidad = document.createElement('td');
+	        tdCantidad.className = 'px-4 py-2';
+	        const input = document.createElement('input');
+	        input.type = 'number';
+	        input.min = 1;
+	        input.value = prod.cantidad;
+	        input.className = 'w-16 border border-gray-300 rounded px-2 py-1';
+	        input.addEventListener('change', e => actualizarCantidad(index, e.target.value));
+	        tdCantidad.appendChild(input);
 
-    // Actualizar cantidad de un producto
+	        // Precio unitario
+	        const tdPrecio = document.createElement('td');
+	        tdPrecio.className = 'px-4 py-2 font-bold text-green-600';
+	        tdPrecio.textContent = `S/ ${prod.precio.toFixed(2)}`;
+
+	        // Subtotal
+	        const tdSubtotal = document.createElement('td');
+	        tdSubtotal.className = 'px-4 py-2 font-semibold text-gray-800';
+	        tdSubtotal.textContent = `S/ ${subtotal.toFixed(2)}`;
+
+	        // Botón eliminar
+	        const tdAccion = document.createElement('td');
+	        tdAccion.className = 'px-4 py-2 text-center';
+	        const btnEliminar = document.createElement('button');
+	        btnEliminar.type = 'button';
+	        btnEliminar.className = 'bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-lg text-sm';
+	        btnEliminar.textContent = 'X';
+	        btnEliminar.addEventListener('click', () => eliminarProducto(index));
+	        tdAccion.appendChild(btnEliminar);
+
+	        // Agregar celdas a la fila
+	        tr.appendChild(tdNombre);
+	        tr.appendChild(tdCantidad);
+	        tr.appendChild(tdPrecio);
+	        tr.appendChild(tdSubtotal);
+	        tr.appendChild(tdAccion);
+
+	        // Agregar fila a la tabla
+	        cuerpoVenta.appendChild(tr);
+	    });
+
+	    totalVentaSpan.textContent = total.toFixed(2);
+	}
+
+    // Actualizar cantidad
     window.actualizarCantidad = (index, cantidad) => {
         cantidad = parseInt(cantidad);
         if (cantidad < 1) cantidad = 1;
+        if (cantidad > productosEnVenta[index].stock) cantidad = productosEnVenta[index].stock;
+
         productosEnVenta[index].cantidad = cantidad;
         renderizarTablaVenta();
     };
@@ -335,105 +369,120 @@ document.addEventListener('DOMContentLoaded', () => {
         renderizarTablaVenta();
     };
 
-	
-	// Confirmar venta con SweetAlert y envío al backend con CSRF
-	window.confirmarVenta = async () => {
-	    if (productosEnVenta.length === 0) {
-	        Swal.fire({
-	            icon: 'warning',
-	            title: 'Atención',
-	            text: 'No hay productos para realizar la venta'
-	        });
-	        return;
-	    }
+    // Confirmar venta
+    window.confirmarVenta = async () => {
+        if (productosEnVenta.length === 0) {
+            Swal.fire({ icon: 'warning', title: 'Atención', text: 'No hay productos para realizar la venta' });
+            return;
+        }
 
-	    // Confirmación con SweetAlert
-	    const { isConfirmed } = await Swal.fire({
-	        title: '¿Seguro quieres confirmar la venta?',
-	        icon: 'question',
-	        showCancelButton: true,
-	        confirmButtonText: 'Sí, confirmar',
-	        cancelButtonText: 'Cancelar'
-	    });
+        // Validar stock antes de enviar
+        for (let prod of productosEnVenta) {
+            if (prod.cantidad < 1) {
+                Swal.fire({ icon: 'error', title: 'Cantidad inválida', text: `La venta de "${prod.nombre}" debe ser al menos 1` });
+                return;
+            }
+            if (prod.cantidad > prod.stock) {
+                Swal.fire({ icon: 'error', title: 'Cantidad inválida', text: `El producto "${prod.nombre}" tiene solo ${prod.stock} unidades disponibles` });
+                return;
+            }
+        }
 
-	    if (!isConfirmed) return;
+        const { isConfirmed } = await Swal.fire({
+            title: '¿Seguro quieres confirmar la venta?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, confirmar',
+            cancelButtonText: 'Cancelar'
+        });
 
-	    // Tomar el usuario (input oculto)
-	    const usuarioIdInput = document.getElementById('usuarioIdInput');
-	    const usuarioId = parseInt(usuarioIdInput.value);
+        if (!isConfirmed) return;
 
-	    // Preparar el DTO de la venta
-	    const ventaDTO = {
-	        usuarioId: usuarioId,
-	        detalles: productosEnVenta.map(p => ({
-	            idProducto: parseInt(p.id),
-	            nombreProducto: p.nombre,
-	            cantidad: p.cantidad,
-	            precioUnitario: p.precio,
-	            subtotal: p.precio * p.cantidad
-	        }))
-	    };
+        const usuarioIdInput = document.getElementById('usuarioIdInput');
+        const usuarioId = parseInt(usuarioIdInput.value);
 
-	    // Capturar token CSRF (de tu input oculto en Thymeleaf)
-	    const csrfTokenInput = document.querySelector('input[name="_csrf"]');
-	    const csrfHeaderInput = document.querySelector('input[name="_csrf_header"]');
-	    const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
-	    const csrfHeader = csrfHeaderInput ? csrfHeaderInput.value : 'X-CSRF-TOKEN';
+        const ventaDTO = {
+            usuarioId: usuarioId,
+            detalles: productosEnVenta.map(p => ({
+                idProducto: parseInt(p.id),
+                nombreProducto: p.nombre,
+                cantidad: p.cantidad,
+                precioUnitario: p.precio,
+                subtotal: p.precio * p.cantidad
+            }))
+        };
 
-	    try {
-	        const response = await fetch('/admin/ventas/crear', {
-	            method: 'POST',
-	            headers: {
-	                'Content-Type': 'application/json',
-	                [csrfHeader]: csrfToken // <--- Token CSRF
-	            },
-	            body: JSON.stringify(ventaDTO)
-	        });
+        const csrfTokenInput = document.querySelector('input[name="_csrf"]');
+        const csrfHeaderInput = document.querySelector('input[name="_csrf_header"]');
+        const csrfToken = csrfTokenInput ? csrfTokenInput.value : '';
+        const csrfHeader = csrfHeaderInput ? csrfHeaderInput.value : 'X-CSRF-TOKEN';
 
-	        if (!response.ok) throw new Error('Error al guardar la venta');
+        try {
+            const response = await fetch('/admin/ventas/crear', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', [csrfHeader]: csrfToken },
+                body: JSON.stringify(ventaDTO)
+            });
 
+            if (!response.ok) throw new Error('Error al guardar la venta');
+
+            const data = await response.json();
+            console.log('Respuesta del Backend:', data);
+		
 			
-			// Actualizar stock en la tabla de productos al vuelo
-			// Solo si existen detalles en la respuesta
-			
-			const data = await response.json();
-			console.log('Respuesta del Backend:',data);
-			
+			// Actualizar stock en tabla solo si venta exitosa
+			// -----------------------------
 			productosEnVenta.forEach(det => {
-			    const trProducto = listaProductos.querySelector(`button[data-id="${det.id}"`)?.closest('tr');
+			    // Obtener la fila del producto en la tabla de búsqueda
+			    const trProducto = listaProductos.querySelector(`button[data-id="${det.id}"]`)?.closest('tr');
 			    if (trProducto) {
-			        const spanStock = trProducto.querySelector('span');
+			        const spanStock = trProducto.querySelector('span'); // el <span> con Tailwind que muestra stock
 			        if (spanStock) {
-			            let stockActual = parseInt(spanStock.textContent.trim()) || 0;
-			            spanStock.textContent = (stockActual - det.cantidad).toString();
+			            // Obtener el stock actual de manera segura (solo números)
+			            const stockActual = parseInt(spanStock.textContent.replace(/\D/g, '')) || 0;
+			            const nuevoStock = stockActual - det.cantidad;
+
+			            // Actualizar visualmente el stock en la tabla
+			            spanStock.textContent = nuevoStock >= 0 ? nuevoStock : 0;
+
+			            // Debug: verificar valores
+			            console.log('🔹 Producto:', det.nombre, 'Stock anterior:', stockActual, 'Cantidad vendida:', det.cantidad, 'Nuevo stock:', nuevoStock);
+
+			            // Definir stock mínimo (Se puede Ajustar, depende ps)
+			            const stockMinimo = 20;
+
+			            // Mostrar alerta si stock < stockMinimo
+			            if (nuevoStock < stockMinimo) {
+			                console.log('⚠️ Stock bajo detectado:', det.nombre, 'Nuevo stock:', nuevoStock);
+			                Swal.fire({
+			                    icon: 'warning',
+			                    title: 'Stock bajo',
+			                    text: `El producto "${det.nombre}" tiene menos de ${stockMinimo} unidades. Reponer pronto.`,
+			                    confirmButtonColor: '#f59e0b' // color naranja para alerta
+			                });
+			            }
+
+			            // Actualizar stock en el arreglo de productosDisponibles
+			            const productoObj = productosDisponibles.find(p => p.id === det.id);
+			            if (productoObj) productoObj.stock = nuevoStock;
 			        }
 			    }
 			});
-			// --- FIN NUEVO CÓDIGO ---
+		
+			// Fin actualización stock
+			
 
-	        // Limpiar tabla de venta
-	        productosEnVenta = [];
-	        renderizarTablaVenta();
+            productosEnVenta = [];
+            renderizarTablaVenta();
 
-	        // Alerta de éxito con SweetAlert
-	        Swal.fire({
-	            icon: 'success',
-	            title: '¡Venta realizada correctamente!',
-	            confirmButtonText: 'OK'
-	        });
+            Swal.fire({ icon: 'success', title: '¡Venta realizada correctamente!', confirmButtonText: 'OK' });
 
-	    } catch (error) {
-	        console.error(error);
-	        Swal.fire({
-	            icon: 'error',
-	            title: 'Error',
-	            text: 'Ocurrió un error al realizar la venta. Revisa la consola.'
-	        });
-	    }
-	};
+        } catch (error) {
+            console.error(error);
+            Swal.fire({ icon: 'error', title: 'Error', text: 'Ocurrió un error al realizar la venta. Revisa la consola.' });
+        }
+    };
 });
-
-		//FIN SCRIPT 
 </script>
 
 <script>
@@ -464,6 +513,8 @@ document.addEventListener('DOMContentLoaded', () => {
         confirmButtonText: 'OK'
     });
 </script>
+
+
 
 </body>
 </html>

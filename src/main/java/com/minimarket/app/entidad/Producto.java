@@ -25,7 +25,7 @@ public class Producto {
     @DecimalMin(value = "0.01", message = "El precio debe ser mayor a 0")
     private Double precio;
     
-    @Min(value = 20, message = "El stock debe ser al menos 20")
+    @Min(value = 0, message = "El stock no puede ser negativo")
     @Column(name = "stock_actual")
     private int stockActual;
 
