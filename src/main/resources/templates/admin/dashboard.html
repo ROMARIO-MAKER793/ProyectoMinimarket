@@ -18,7 +18,8 @@
             <div class="bg-white rounded-2xl shadow-lg p-6 flex justify-between items-center">
                 <div>
                     <p class="text-gray-500">Productos</p>
-                    <h2 class="text-3xl font-bold text-gray-800 mt-2">25</h2>
+                    <h2 class="text-3xl font-bold text-gray-800 mt-2"
+                        th:text="${totalProductos}">0</h2>
                 </div>
                 <div class="bg-blue-100 p-4 rounded-xl">
                     <i class="bi bi-box text-3xl text-blue-600"></i>
@@ -28,7 +29,8 @@
             <div class="bg-white rounded-2xl shadow-lg p-6 flex justify-between items-center">
                 <div>
                     <p class="text-gray-500">Categorías</p>
-                    <h2 class="text-3xl font-bold text-gray-800 mt-2">6</h2>
+                    <h2 class="text-3xl font-bold text-gray-800 mt-2"
+                        th:text="${totalCategorias}">0</h2>
                 </div>
                 <div class="bg-green-100 p-4 rounded-xl">
                     <i class="bi bi-tags text-3xl text-green-600"></i>
@@ -38,7 +40,8 @@
             <div class="bg-white rounded-2xl shadow-lg p-6 flex justify-between items-center">
                 <div>
                     <p class="text-gray-500">Ventas del Mes</p>
-                    <h2 class="text-3xl font-bold text-gray-800 mt-2">S/ 1,250</h2>
+                    <h2 class="text-3xl font-bold text-gray-800 mt-2"
+                        th:text="'S/ ' + ${#numbers.formatDecimal(ventasMes,1,2)}">S/ 0</h2>
                 </div>
                 <div class="bg-yellow-100 p-4 rounded-xl">
                     <i class="bi bi-currency-dollar text-3xl text-yellow-600"></i>
@@ -48,7 +51,8 @@
             <div class="bg-white rounded-2xl shadow-lg p-6 flex justify-between items-center">
                 <div>
                     <p class="text-gray-500">Usuarios</p>
-                    <h2 class="text-3xl font-bold text-gray-800 mt-2">12</h2>
+                    <h2 class="text-3xl font-bold text-gray-800 mt-2"
+                        th:text="${totalUsuarios}">0</h2>
                 </div>
                 <div class="bg-purple-100 p-4 rounded-xl">
                     <i class="bi bi-people-fill text-3xl text-purple-600"></i>
@@ -95,24 +99,30 @@
                     Actividad Reciente
                 </h3>
 
-                <div class="space-y-4">
+				<div class="bg-white rounded-lg shadow p-4 max-h-96 overflow-y-auto">
+				    <h3 class="text-lg font-semibold mb-3">Actividad Reciente</h3>
 
-                    <div class="flex items-center justify-between border-b pb-3">
-                        <span class="text-gray-600">Nuevo producto agregado</span>
-                        <span class="text-sm text-gray-400">Hace 2h</span>
-                    </div>
+				    <div class="space-y-3">
+				        <div th:each="venta : ${actividadesRecientes}" 
+				             class="flex items-center gap-3 p-2 rounded hover:bg-gray-100 transition">
 
-                    <div class="flex items-center justify-between border-b pb-3">
-                        <span class="text-gray-600">Venta registrada</span>
-                        <span class="text-sm text-gray-400">Hace 4h</span>
-                    </div>
+				            <!-- Ícono fijo para todas las ventas -->
+				            <i class="bi bi-cart-fill text-green-500 text-xl"></i>
 
-                    <div class="flex items-center justify-between border-b pb-3">
-                        <span class="text-gray-600">Nuevo usuario creado</span>
-                        <span class="text-sm text-gray-400">Ayer</span>
-                    </div>
+				            <!-- Contenido de la actividad -->
+				            <div class="flex-1">
+				                <p class="text-sm">
+				                    Venta realizada por 
+				                    <strong th:text="${venta.usuario.usuario}"></strong> 
+				                    por 
+				                    <strong th:text="'S/ ' + ${#numbers.formatDecimal(venta.total,1,2)}"></strong>
+				                </p>
+				                <p class="text-xs text-gray-400" th:text="${#temporals.format(venta.fecha,'dd/MM/yyyy HH:mm')}"></p>
+				            </div>
 
-                </div>
+				        </div>
+				    </div>
+				</div>
 
             </div>
 
@@ -122,56 +132,3 @@
 
 </div>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-
-    // Ventas Mensuales
-    new Chart(document.getElementById('salesChart'), {
-        type: 'line',
-        data: {
-            labels: ['Ene','Feb','Mar','Abr','May','Jun'],
-            datasets: [{
-                data: [500, 800, 600, 900, 1200, 1500],
-                borderColor: '#4f46e5',
-                backgroundColor: 'rgba(79,70,229,0.1)',
-                fill: true,
-                tension: 0.4
-            }]
-        },
-        options: {
-            plugins: { legend: { display: false } }
-        }
-    });
-
-    // Productos Más Vendidos
-    new Chart(document.getElementById('productChart'), {
-        type: 'bar',
-        data: {
-            labels: ['Arroz','Leche','Azúcar','Aceite'],
-            datasets: [{
-                data: [120, 95, 80, 60],
-                backgroundColor: ['#3b82f6','#10b981','#f59e0b','#ef4444']
-            }]
-        },
-        options: {
-            plugins: { legend: { display: false } }
-        }
-    });
-
-    // Categorías
-    new Chart(document.getElementById('categoryChart'), {
-        type: 'doughnut',
-        data: {
-            labels: ['Granos','Lácteos','Bebidas','Otros'],
-            datasets: [{
-                data: [40, 25, 20, 15],
-                backgroundColor: ['#6366f1','#22c55e','#facc15','#f43f5e']
-            }]
-        }
-    });
-
-});
-</script>

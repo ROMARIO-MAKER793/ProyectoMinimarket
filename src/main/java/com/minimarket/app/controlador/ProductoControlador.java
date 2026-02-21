@@ -30,9 +30,8 @@ public class ProductoControlador {
     @Autowired
     private MarcaServicio marcaServicio;
 
-    // =========================
+
     // LISTAR PRODUCTOS
-    // =========================
 	
 	  @GetMapping 
 	  public String listar(Model model) {
@@ -48,11 +47,9 @@ public class ProductoControlador {
 	  
 	  }
 	  
-	
-
-    // =========================
+ 
     // GUARDAR (CREAR / EDITAR)
-    // =========================
+   
 	  @PostMapping("/guardar")
 	    public String guardar(
 	            @Valid @ModelAttribute Producto producto,
@@ -80,9 +77,9 @@ public class ProductoControlador {
        
     }
 
-    // =========================
+   
     // ELIMINAR
-    // =========================
+    
     @GetMapping("/eliminar/{id}")
     public String eliminar(@PathVariable Long id, RedirectAttributes redirectAttributes) {
 

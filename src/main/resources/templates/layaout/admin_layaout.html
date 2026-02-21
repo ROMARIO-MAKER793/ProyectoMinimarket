@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Panel Admin</title>
+	
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -31,7 +33,7 @@
     <div th:replace="~{layaout/sidebar :: sidebar}"></div>
 
     <!-- CONTENIDO -->
-    <main class="flex-1 p-6">
+    <main class="flex-1 p-6 overflow-auto">
         <div th:replace="~{${content} :: contenido}"></div>
     </main>
 
@@ -482,6 +484,75 @@ document.addEventListener('DOMContentLoaded', () => {
             Swal.fire({ icon: 'error', title: 'Error', text: 'Ocurrió un error al realizar la venta. Revisa la consola.' });
         }
     };
+});
+
+
+</script>
+
+
+
+<script th:inline="javascript">
+document.addEventListener("DOMContentLoaded", function() {
+
+    const ventasData = /*[[${ventasPorMes}]]*/ [];
+    const productosData = /*[[${productosMasVendidos}]]*/ [];
+    const categoriasData = /*[[${distribucionCategorias}]]*/ [];
+
+    console.log("Ventas:", ventasData);
+    console.log("Productos:", productosData);
+    console.log("Categorias:", categoriasData);
+
+    // =============================
+    // VENTAS POR MES
+    // =============================
+    if (ventasData.length > 0) {
+        new Chart(document.getElementById('salesChart'), {
+            type: 'line',
+            data: {
+                labels: ventasData.map(v => "Mes " + v.mes),
+                datasets: [{
+                    label: 'Ventas por Mes',
+                    data: ventasData.map(v => parseFloat(v.total.toFixed(2))),
+                    borderWidth: 2,
+                    fill: false
+                }]
+            }
+        });
+    }
+
+    // =============================
+    // PRODUCTOS MÁS VENDIDOS
+    // =============================
+    if (productosData.length > 0) {
+        new Chart(document.getElementById('productChart'), {
+            type: 'bar',
+            data: {
+                labels: productosData.map(p => p.nombre),
+                datasets: [{
+                    label: 'Productos más vendidos',
+                    data: productosData.map(p => p.cantidad),
+                    borderWidth: 1
+                }]
+            }
+        });
+    }
+
+    // =============================
+    // DISTRIBUCIÓN CATEGORÍAS
+    // =============================
+    if (categoriasData.length > 0) {
+        new Chart(document.getElementById('categoryChart'), {
+            type: 'pie',
+            data: {
+                labels: categoriasData.map(c => c.nombre),
+                datasets: [{
+                    label: 'Distribución por Categoría',
+                    data: categoriasData.map(c => c.cantidad)
+                }]
+            }
+        });
+    }
+
 });
 </script>
 

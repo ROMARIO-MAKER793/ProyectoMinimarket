@@ -1,19 +1,13 @@
 package com.minimarket.app.controlador;
 
-import com.minimarket.app.entidad.DetalleVenta;
-import com.minimarket.app.entidad.DetalleVentaDTO;
-import com.minimarket.app.entidad.Producto;
+
 import com.minimarket.app.entidad.Usuario;
 import com.minimarket.app.entidad.Venta;
 import com.minimarket.app.entidad.VentaDTO;
-import com.minimarket.app.repositorio.DetalleVentaRepositorio;
-import com.minimarket.app.repositorio.ProductoRepositorio;
-import com.minimarket.app.repositorio.VentaRepositorio;
 
 import com.minimarket.app.servicio.VentaServicio;
 import com.minimarket.app.servicio.ProductoServicio;
 
-import com.minimarket.app.servicio.UsuarioServicio;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -38,20 +32,6 @@ public class VentaControlador {
     @Autowired
     private ProductoServicio productoServicio;
     
-    @Autowired
-    private UsuarioServicio usuarioServicio;
-    
-    @Autowired
-    private VentaRepositorio ventaRepositorio;
-   
-    @Autowired
-    private ProductoRepositorio productoRepositorio;
-    
-    @Autowired
-    private DetalleVentaRepositorio detalleVentaRepositorio;
-
- 
-
     
     // LISTAR VENTAS / VENTANA DE VENTA
    
@@ -80,7 +60,7 @@ public class VentaControlador {
         return "redirect:/admin/ventas";
     }
     
- // NUEVO: GUARDAR VENTA DESDE FRONT-END CON DTO (JSON) CON VALIDACIÓN DE STOCK
+ // GUARDAR VENTA DESDE FRONT-END CON DTO (JSON) CON VALIDACIÓN DE STOCK
     @PostMapping("/crear")
     @ResponseBody
     public Map<String, Object> crearVenta(@RequestBody VentaDTO ventaDTO) {
@@ -97,7 +77,7 @@ public class VentaControlador {
     }
 
     
-    // HISTORIAL DE VENTAS 
+    // HISTORIAL DE VENTAS FALTA CREAR BOTON Y MODAL Y REPORTE
     
     @GetMapping("/historial")
     public String historial(Model model) {

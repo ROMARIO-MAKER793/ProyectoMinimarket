@@ -45,7 +45,6 @@ public class UsuarioControlador {
 
 	   
 	    //GUARDAR Y EDITAR
-	    
 
 	    @PostMapping("/guardar")
 	    public String guardarUsuario(
@@ -53,7 +52,7 @@ public class UsuarioControlador {
 	            @RequestParam String usuario,
 	            @RequestParam String contrasena,
 	            @RequestParam Boolean habilitado,
-	            @RequestParam("rolId") Long rolId,
+	            @RequestParam("rolId") Long rolId, //este no es un error, solo advertencia
 	            @RequestParam("confirmarContrasena") String confirmar) {
 
 	        Usuario nuevo = new Usuario();

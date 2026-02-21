@@ -17,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class SecurityConfig {
 
 	@Autowired
-    private LoginSuccess loginSuccessHandler; // Usar tu handler
+    private LoginSuccess loginSuccessHandler; // Usar handler
 
     @Bean
     PasswordEncoder passwordEncoder() {
@@ -58,7 +58,7 @@ public class SecurityConfig {
                 .successHandler(loginSuccessHandler) // Usamos tu handler
                 .permitAll()
             )
-
+            	//JSESSIONID para borrar las cookies y no pueda ingresar el usuario
             .logout(logout -> logout
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/login?logout")

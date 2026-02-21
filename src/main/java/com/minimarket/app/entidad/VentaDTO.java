@@ -4,6 +4,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.*;
 
+//DTO PARA TRAER SOLO LOS DATOS QUE NECESITAMOS
+
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
