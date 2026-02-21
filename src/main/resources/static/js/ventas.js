@@ -220,7 +220,7 @@ function procesarVenta() {
 //FUNCIONALIDAD DE IMPRESIÓN DE TICKET
 function imprimirTicket(numeroBoleta, total) {
     let fecha = new Date().toLocaleString('es-PE');
-    let cajeroId = document.getElementById('usuarioIdInput').value;//obtenemos nombre de cajero en lugar de id
+    let cajeroNombre = document.getElementById('usuarioNombreInput').value;;//obtenemos nombre de cajero en lugar de id
     
     // Plantilla HTML estructurada para impresora térmica de 80mm
     let ticketHTML = `
