@@ -34,12 +34,15 @@ public class VentaControlador {
     
     
     // LISTAR VENTAS / VENTANA DE VENTA
-   
+    
     @GetMapping
     public String listar(Model model, @AuthenticationPrincipal Usuario usuarioLogueado) {
         model.addAttribute("productos", productoServicio.listarActivos()); // productos para vender
         model.addAttribute("venta", new Venta());
+        
+        // Enviamos tanto el ID como el Username del cajero logueado
         model.addAttribute("usuarioId", usuarioLogueado.getId());
+        model.addAttribute("usuarioNombre", usuarioLogueado.getUsername()); 
         model.addAttribute("content", "admin/ventas"); // indica el fragment a cargar
         return "layaout/admin_layaout"; 
     }
