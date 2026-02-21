@@ -138,6 +138,7 @@ public class VentaServicioImpl implements VentaServicio {
         ventaRepositorio.save(venta);
 
         respuesta.put("idVenta", venta.getId());
+        respuesta.put("numeroBoleta", venta.getNumeroBoleta());//agrego para obtener el # de boleta pq no se muestra en el comprobante
         respuesta.put("mensaje", "¡Venta creada correctamente!");
 
         return respuesta;
