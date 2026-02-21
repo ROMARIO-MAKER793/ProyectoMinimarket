@@ -188,14 +188,23 @@ function procesarVenta() {
 
                 let data = await response.json();
 
-                if(response.ok && !data.error) {
+				if(response.ok && !data.error) {
+                    // Cambiamos el SweetAlert para preguntar si desea imprimir el ticket
                     Swal.fire({
                         icon: 'success',
-                        title: '¡Venta Exitosa!',
-                        text: 'Comprobante generado: ' + data.numeroBoleta,
-                        confirmButtonText: 'Aceptar'
-                    }).then(() => {
-                        window.location.reload(); 
+                        title: '¡Venta Procesada!',
+                        text: 'Comprobante: ' + data.numeroBoleta,
+                        showCancelButton: true,
+                        confirmButtonText: '<i class="fa fa-print"></i> Imprimir Ticket',
+                        cancelButtonText: 'Cerrar y Continuar',
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#6c757d',
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            imprimirTicket(data.numeroBoleta, total);
+                        } else {
+                            window.location.reload(); 
+                        }
                     });
                 } else {
                     Swal.fire('Error', 'No se pudo procesar la venta: ' + (data.error || 'Desconocido'), 'error');
@@ -206,4 +215,97 @@ function procesarVenta() {
             }
         }
     });
+}
+
+//FUNCIONALIDAD DE IMPRESIÓN DE TICKET
+function imprimirTicket(numeroBoleta, total) {
+    let fecha = new Date().toLocaleString('es-PE');
+    let cajeroId = document.getElementById('usuarioIdInput').value;
+    
+    // Plantilla HTML estructurada para impresora térmica de 80mm
+    let ticketHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Ticket de Venta</title>
+            <style>
+                body { 
+                    font-family: 'Courier New', Courier, monospace; 
+                    font-size: 12px; 
+                    width: 80mm; 
+                    margin: 0 auto; 
+                    padding: 10px; 
+                    color: #000;
+                }
+                h2, p { margin: 2px 0; text-align: center; }
+                h2 { font-size: 16px; font-weight: bold; margin-bottom: 5px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; margin-bottom: 10px; }
+                th, td { text-align: left; padding: 4px 0; font-size: 12px; border-bottom: 1px dotted #ccc;}
+                .right { text-align: right; }
+                .center { text-align: center; }
+                .divider { border-top: 1px dashed #000; margin: 10px 0; }
+                .total-row { font-weight: bold; font-size: 14px; }
+                .total-row td { border-bottom: none; padding-top: 10px; }
+                @media print {
+                    @page { margin: 0; }
+                    body { margin: 0.5cm; }
+                }
+            </style>
+        </head>
+        <body>
+            <h2>BODEGAS FAMILIA S.A.C.</h2>
+            <p>RUC: 20123456789</p>
+            <p>Av. Principal 123, San Juan de Lurigancho</p>
+            <div class="divider"></div>
+            <p style="text-align: left;"><strong>TICKET BOLETA:</strong> ${numeroBoleta}</p>
+            <p style="text-align: left;"><strong>FECHA:</strong> ${fecha}</p>
+            <p style="text-align: left;"><strong>CAJERO:</strong> ID ${cajeroId}</p>
+            <div class="divider"></div>
+            
+            <table>
+                <thead>
+                    <tr>
+                        <th class="center" style="width: 15%;">Cant</th>
+                        <th style="width: 55%;">Descripción</th>
+                        <th class="right" style="width: 30%;">Importe</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${carrito.map(item => `
+                        <tr>
+                            <td class="center">${item.cantidad}</td>
+                            <td>${item.nombreProducto}</td>
+                            <td class="right">S/ ${item.subtotal.toFixed(2)}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            
+            <table>
+                <tr class="total-row">
+                    <td>TOTAL A PAGAR:</td>
+                    <td class="right">S/ ${total}</td>
+                </tr>
+            </table>
+            
+            <div class="divider"></div>
+            <p>¡Gracias por su preferencia!</p>
+            <p>Conserve este ticket en caso de cambios o devoluciones.</p>
+        </body>
+        </html>
+    `;
+
+    //Abrimos una ventana oculta/emergente para renderizar el ticket
+    let ventanaEmergente = window.open('', 'Imprimir Ticket', 'width=400,height=600');
+    ventanaEmergente.document.write(ticketHTML);
+    ventanaEmergente.document.close();
+    
+    //Enfocamos la ventana y disparamos la impresión
+    ventanaEmergente.focus();
+    setTimeout(() => {
+        ventanaEmergente.print();
+        ventanaEmergente.close();
+        //Una vez que se cierra el diálogo de impresión, recargamos la página principal
+        window.location.reload();
+    }, 500);
 }
