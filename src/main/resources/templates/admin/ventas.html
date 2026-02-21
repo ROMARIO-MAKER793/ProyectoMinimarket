@@ -6,11 +6,12 @@
             <p class="text-gray-500 text-sm mt-1">Selecciona los productos para armar el ticket</p>
         </div>
         <div class="text-right">
-            <p class="text-sm text-gray-500">Cajero ID: <span th:text="${usuarioId}" class="font-bold"></span></p>
+           <p class="text-sm text-gray-500">Cajero: <span th:text="${usuarioNombre}" class="font-bold uppercase text-blue-600"></span></p>
         </div>
     </div>
 	
     <input type="hidden" id="usuarioIdInput" th:value="${usuarioId}">
+	<input type="hidden" id="usuarioNombreInput" th:value="${usuarioNombre}">
     <input type="hidden" id="csrfToken" th:value="${_csrf.token}">
     <input type="hidden" id="csrfHeader" th:value="${_csrf.headerName}">
 
