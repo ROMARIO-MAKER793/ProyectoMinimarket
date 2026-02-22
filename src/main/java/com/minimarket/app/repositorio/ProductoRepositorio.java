@@ -27,4 +27,15 @@ public interface ProductoRepositorio extends JpaRepository<Producto, Long> {
             GROUP BY p.categoria.nombre
         """)
         List<Object[]> distribucionCategorias();
+        
+     // Reportes para visualizar productos bajos
+		
+		@Query("""		
+		SELECT p
+		FROM Producto p
+		WHERE p.stockActual < 20
+		ORDER BY p.stockActual ASC 
+		""")
+		List<Producto> productoEnAlerta();
+		    
 }

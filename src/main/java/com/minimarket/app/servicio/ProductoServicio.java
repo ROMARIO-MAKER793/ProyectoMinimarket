@@ -26,4 +26,6 @@ public interface ProductoServicio {
     void eliminar(Long id);
     
     boolean actualizarStock(Producto producto);
+    
+    List<Producto> obtenerProductoEnAlerta();
 }

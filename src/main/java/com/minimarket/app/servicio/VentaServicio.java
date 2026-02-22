@@ -7,7 +7,7 @@ import java.util.Map;
 
 import com.minimarket.app.entidad.Venta;
 import com.minimarket.app.entidad.VentaDTO;
-
+import com.minimarket.app.dto.ReporteVentaMesDTO;
 import com.minimarket.app.entidad.Producto;
 
 
@@ -31,5 +31,19 @@ public interface VentaServicio {
   //Crear con toda la logica
     Map<String, Object> crearVentaDTO(VentaDTO ventaDTO) throws IOException;
     
+    //METODOS PARA REPORTE VENTAS
     
+    List<ReporteVentaMesDTO> getReporteVentasDelMes();
+    
+    double obtenerTotalVentasHoy();
+    
+    double obtenerTotalVentasMes();
+    
+    Long obtenerCantidadVentasMes();
+    
+    Long obtenerTotalProductosVendidosMes();
+    
+    List<Object[]> obtenerVentasPorDiaDelMes(); 
+    
+    List<Object[]> obtenerTop5ProductosMes(); 
 }
