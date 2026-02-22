@@ -41,6 +41,8 @@ public class SecurityConfig {
                 .requestMatchers("/admin/ventas/crear").hasAnyRole("ADMIN", "USER")// permite al user tambien procesar venta
                 .requestMatchers("/admin/ventas/guardar").hasRole("ADMIN") // form anticucho
                 .requestMatchers("/admin/ventas/eliminar/**").hasRole("ADMIN")
+                .requestMatchers("/admin/ventas/historial").hasRole("ADMIN")
+                .requestMatchers("/admin/ventas/exportar/**").hasRole("ADMIN")
                 
                 // PRODUCTOS (solo admin puede modificar)
                 .requestMatchers("/admin/productos/guardar").hasRole("ADMIN")
