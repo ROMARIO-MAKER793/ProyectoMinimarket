@@ -21,6 +21,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.*;
+import java.time.format.DateTimeFormatter;
+
 
 @Controller
 @RequestMapping("admin/ventas")
@@ -89,4 +98,56 @@ public class VentaControlador {
         model.addAttribute("content", "admin/historial_ventas");
         return "layaout/admin_layaout";
     }
+    
+    // ==========================================
+    // EXPORTAR A EXCEL
+    // ==========================================
+    @GetMapping("/exportar/excel")
+    public void exportarExcel(HttpServletResponse response) throws Exception {
+        response.setContentType("application/octet-stream");
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=historial_ventas.xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        List<Venta> ventas = ventaServicio.listarTodos();
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Ventas");
+        
+     // Estilo para la cabecera
+        CellStyle headerStyle = workbook.createCellStyle();
+        org.apache.poi.ss.usermodel.Font headerFont = workbook.createFont(); // <-- ¡Aquí está el truco!
+        headerFont.setBold(true);
+        headerStyle.setFont(headerFont);
+
+        // Fila de Cabecera
+        Row headerRow = sheet.createRow(0);
+        String[] columnas = {"ID", "Fecha", "N° Boleta", "Cajero", "Total (S/)"};
+        for (int i = 0; i < columnas.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(columnas[i]);
+            cell.setCellStyle(headerStyle);
+        }
+
+        // Llenar datos
+        int rowIdx = 1;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
+        for (Venta venta : ventas) {
+            Row row = sheet.createRow(rowIdx++);
+            row.createCell(0).setCellValue(venta.getId());
+            row.createCell(1).setCellValue(venta.getFecha() != null ? venta.getFecha().format(formatter) : "N/A");
+            row.createCell(2).setCellValue(venta.getNumeroBoleta());
+            row.createCell(3).setCellValue(venta.getUsuario() != null ? venta.getUsuario().getUsername() : "N/A");
+            row.createCell(4).setCellValue(venta.getTotal());
+        }
+
+        // Autoajustar columnas
+        for (int i = 0; i < columnas.length; i++) {
+            sheet.autoSizeColumn(i);
+        }
+
+        workbook.write(response.getOutputStream());
+        workbook.close();
+    }
+
+   
 }
