@@ -105,5 +105,11 @@ public class ProductoServicioImpl implements ProductoServicio {
 		return true;
 	}
 
+	@Override
+	public List<Producto> obtenerProductoEnAlerta() {
+		
+		return productoRepositorio.productoEnAlerta();
+	}
+
 	
 }

@@ -39,6 +39,8 @@
 
 </div>
 
+
+
 <!-- JS CRUD -->
 <script>
 	
@@ -494,10 +496,9 @@ document.addEventListener('DOMContentLoaded', () => {
 <script th:inline="javascript">
 document.addEventListener("DOMContentLoaded", function() {
 
-    const ventasData = /*[[${ventasPorMes}]]*/ [];
-    const productosData = /*[[${productosMasVendidos}]]*/ [];
-    const categoriasData = /*[[${distribucionCategorias}]]*/ [];
-
+    const ventasData = /*[[${ventasPorMes}]]*/null;
+    const productosData = /*[[${productosMasVendidos}]]*/null;
+    const categoriasData = /*[[${distribucionCategorias}]]*/null;
     console.log("Ventas:", ventasData);
     console.log("Productos:", productosData);
     console.log("Categorias:", categoriasData);
@@ -505,7 +506,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // =============================
     // VENTAS POR MES
     // =============================
-    if (ventasData.length > 0) {
+    if (Array.isArray(ventasData) && ventasData.length > 0) {
         new Chart(document.getElementById('salesChart'), {
             type: 'line',
             data: {
@@ -523,7 +524,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // =============================
     // PRODUCTOS MÁS VENDIDOS
     // =============================
-    if (productosData.length > 0) {
+    if (Array.isArray(productosData) && productosData.length > 0) {
         new Chart(document.getElementById('productChart'), {
             type: 'bar',
             data: {
@@ -540,7 +541,7 @@ document.addEventListener("DOMContentLoaded", function() {
     // =============================
     // DISTRIBUCIÓN CATEGORÍAS
     // =============================
-    if (categoriasData.length > 0) {
+    if (Array.isArray(categoriasData)&&  categoriasData.length > 0) {
         new Chart(document.getElementById('categoryChart'), {
             type: 'pie',
             data: {
@@ -552,6 +553,210 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
+});
+</script>
+
+
+<script th:inline="javascript">
+document.addEventListener("DOMContentLoaded", function () {
+
+    const canvas = document.getElementById('ventasMesChart');
+
+    if (!canvas) return; // 👈 SI NO EXISTE, NO HACE NADA
+
+    const ctx = canvas.getContext('2d');
+
+    const ventasMesData = /*[[${ventasDelMes}]]*/ [];
+
+    if (!ventasMesData || ventasMesData.length === 0) return;
+
+    const nombres = ventasMesData.map(v => v.producto);
+    const totales = ventasMesData.map(v => v.totalVendido);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: nombres,
+            datasets: [{
+                label: 'Total Vendido S/',
+                data: totales,
+                backgroundColor: 'rgba(34,197,94,0.6)',
+                borderColor: 'rgba(34,197,94,1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+
+});
+</script>
+
+<!--/*Script para reporters con graficos*/-->
+
+<script th:inline="javascript">
+document.addEventListener("DOMContentLoaded", function () {
+
+    const canvas = document.getElementById("ventasMesChartReportes");
+    if (!canvas) return;
+
+    const ventas = /*[[${ventas}]]*/ [];
+
+    if (!Array.isArray(ventas) || ventas.length === 0) return;
+
+    const labels = ventas.map(v => v.producto);
+    const totales = ventas.map(v => v.totalVendido);
+
+    const maxValor = Math.max(...totales);
+
+    new Chart(canvas.getContext("2d"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Total Vendido S/",
+                data: totales,
+                backgroundColor: "rgba(34,197,94,0.7)",
+                borderRadius: 8,
+                barThickness: 40
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: maxValor + (maxValor * 0.1),
+                    ticks: {
+                        stepSize: Math.ceil(maxValor / 4)
+                    },
+                    grid: {
+                        color: "rgba(0,0,0,0.05)"
+                    }
+                }
+            }
+        }
+    });
+
+});
+</script>
+
+ <!--script para repores dias que se vendieorn mas con lineas-->
+<script th:inline="javascript">
+document.addEventListener("DOMContentLoaded", function () {
+
+    const canvasLinea = document.getElementById("ventasDiaChart");
+    if (!canvasLinea) return;
+
+    const ventasPorDia = /*[[${ventasPorDia}]]*/ [];
+
+    if (!Array.isArray(ventasPorDia) || ventasPorDia.length === 0) return;
+
+    const labels = ventasPorDia.map(v => "Día " + v[0]);
+    const totales = ventasPorDia.map(v => v[1]);
+
+    new Chart(canvasLinea.getContext("2d"), {
+        type: "line",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Ventas por Día S/",
+                data: totales,
+                fill: true,
+				backgroundColor: "rgba(37,99,235,1)",
+                tension: 0.4,
+                borderWidth: 3,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: "rgba(0,0,0,0.05)"
+                    }
+                }
+            }
+        }
+    });
+
+});
+</script>
+
+ <!--script para reportes top productos-->
+<script th:inline="javascript">
+document.addEventListener("DOMContentLoaded", function () {
+
+    const canvasTop = document.getElementById("topProductosChart");
+    if (!canvasTop) return;
+
+    const topProductos = /*[[${topProductos}]]*/ [];
+
+    if (!Array.isArray(topProductos) || topProductos.length === 0) return;
+
+    const labels = topProductos.map(p => p[0]);
+    const cantidades = topProductos.map(p => p[1]);
+
+    new Chart(canvasTop.getContext("2d"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Cantidad Vendida",
+				backgroundColor: [
+				        "rgba(59, 130, 246, 0.8)",   // Azul
+				        "rgba(16, 185, 129, 0.8)",   // Verde
+				        "rgba(245, 158, 11, 0.8)",   // Amarillo
+				        "rgba(239, 68, 68, 0.8)",    // Rojo
+				        "rgba(139, 92, 246, 0.8)"    // Morado
+				    ],
+                data: cantidades,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            indexAxis: 'y', // 👈 HORIZONTAL
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
 
 });
 </script>

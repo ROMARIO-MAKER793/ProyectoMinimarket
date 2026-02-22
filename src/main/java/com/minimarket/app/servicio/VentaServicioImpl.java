@@ -2,6 +2,7 @@ package com.minimarket.app.servicio;
 
 import com.minimarket.app.entidad.Venta;
 import com.minimarket.app.entidad.VentaDTO;
+import com.minimarket.app.dto.ReporteVentaMesDTO;
 import com.minimarket.app.entidad.DetalleVenta;
 import com.minimarket.app.entidad.DetalleVentaDTO;
 import com.minimarket.app.entidad.Producto;
@@ -150,6 +151,65 @@ public class VentaServicioImpl implements VentaServicio {
         long count = ventaRepositorio.count() + 1;
         return String.format("B-%05d", count); // Ej: B-00001, B-00002
     }
+
+    //Metodo para reportes
+
+	@Override
+	public List<ReporteVentaMesDTO> getReporteVentasDelMes() {
+		return ventaRepositorio.obtenerVentasDelMes();
+	}
+
+
+	@Override
+	public double obtenerTotalVentasHoy() {
+		
+	    LocalDateTime inicio = LocalDateTime.now().toLocalDate().atStartOfDay();
+	    LocalDateTime fin = inicio.plusDays(1).minusSeconds(1);
+
+	    return ventaRepositorio.totalVentasEntreFechas(inicio, fin);
+	}
+
+
+	@Override
+	public double obtenerTotalVentasMes() {
+		
+		return ventaRepositorio.totalVentasMesActual();
+	}
+
+
+	@Override
+	public Long obtenerCantidadVentasMes() {
+		
+		return ventaRepositorio.cantidadVentasMesActual();
+	}
+
+
+	@Override
+	public Long obtenerTotalProductosVendidosMes() {
+		
+		return ventaRepositorio.totalProductosVendidosMesActual();
+	}
+
+
+	@Override
+	public List<Object[]> obtenerVentasPorDiaDelMes() {
+		
+		return ventaRepositorio.ventasPorDiaDelMes();
+	}
+
+
+	@Override
+	public List<Object[]> obtenerTop5ProductosMes() {
+		
+		return ventaRepositorio.topProductosMes()
+				.stream()
+				.limit(5)
+				.toList();
+	}
+	
+	
+	
+	
 
 
 }
