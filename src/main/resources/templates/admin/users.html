@@ -3,7 +3,8 @@
     <!-- HEADER -->
     <div class="flex justify-between items-center">
         <div>
-            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                <i class="bi bi-people-fill text-indigo-600"></i>
                 Gestión de Usuarios
             </h1>
             <p class="text-gray-600 text-lg mt-2">
@@ -13,9 +14,9 @@
 
         <!-- BOTÓN NUEVO USUARIO -->
         <button onclick="prepareCreateUser()"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl shadow-lg transition font-semibold"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl shadow-lg transition font-semibold flex items-center gap-2"
                 sec:authorize="hasRole('ADMIN')">
-            + Nuevo Usuario
+            <i class="bi bi-plus-lg"></i> Nuevo Usuario
         </button>
     </div>
 
@@ -32,22 +33,25 @@
                 <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase">Estado</th>
                 <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase">Contraseña</th>
                 <th class="px-6 py-4 text-center text-sm font-bold text-gray-700 uppercase"
-                    sec:authorize="hasRole('ADMIN')">
-                    Acciones
-                </th>
+                    sec:authorize="hasRole('ADMIN')">Acciones</th>
             </tr>
             </thead>
 
             <tbody class="divide-y divide-gray-100">
 
             <!-- LISTADO REAL -->
-            <tr th:each="usuario : ${usuarios}" class="hover:bg-gray-50">
+            <tr th:each="usuario : ${usuarios}" class="hover:bg-gray-50 transition">
 
+                <!-- ID -->
                 <td class="px-6 py-4 font-medium" th:text="${usuario.id}"></td>
 
-                <td class="px-6 py-4 font-semibold text-gray-800" th:text="${usuario.usuario}"></td>
+                <!-- NOMBRE USUARIO -->
+                <td class="px-6 py-4 font-semibold text-gray-800 flex items-center gap-2">
+                    <i class="bi bi-person-circle text-indigo-500 text-lg"></i>
+                    <span class="flex items-center" th:text="${usuario.usuario}"></span>
+                </td>
 
-                <!-- ROLES SIN STREAM -->
+                <!-- ROLES -->
                 <td class="px-6 py-4 text-gray-600 font-medium">
                     <span th:if="${#lists.isEmpty(usuario.roles)}">Sin Rol</span>
                     <span th:each="rol, iterStat : ${usuario.roles}">
@@ -70,23 +74,20 @@
                 </td>
 
                 <!-- ACCIONES -->
-                <td class="px-6 py-4 text-center space-x-2" sec:authorize="hasRole('ADMIN')">
-					<button th:attr="onclick=|prepareEditUser(
-					    ${usuario.id},
-					    '${usuario.usuario}',
-					    ${usuario.habilitado},
-					    ${#lists.isEmpty(usuario.roles) ? 0 : usuario.roles.iterator().next().id})|"
-					        
-					class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold"
-					       
-					 sec:authorize="hasRole('ADMIN')">
-					   
-					  Editar
-					</button>
+                <td class="px-6 py-4 flex items-center justify-center gap-2" sec:authorize="hasRole('ADMIN')">
+                    <button th:attr="onclick=|prepareEditUser(
+                        ${usuario.id},
+                        '${usuario.usuario}',
+                        ${usuario.habilitado},
+                        ${#lists.isEmpty(usuario.roles) ? 0 : usuario.roles.iterator().next().id})|"
+                        class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1"
+                        sec:authorize="hasRole('ADMIN')">
+                        <i class="bi bi-pencil-fill"></i> Editar
+                    </button>
 
                     <button type="button" th:onclick="|confirmDeleteUser(${usuario.id})|"
-                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold">
-                        Eliminar
+                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1">
+                        <i class="bi bi-trash-fill"></i> Eliminar
                     </button>
                 </td>
 
@@ -103,79 +104,84 @@
 
         </table>
 
-		<!-- MODAL NUEVO/EDITAR USUARIO -->
-		<div id="userModal"
-		     class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+        <!-- MODAL NUEVO/EDITAR USUARIO -->
+        <div id="userModal"
+             class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
 
-		    <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6 mx-4 sm:mx-auto">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6 mx-4 sm:mx-auto">
 
-		        <h2 id="modalTitleUser" class="text-2xl font-bold mb-4">
-		            Nuevo Usuario
-		        </h2>
+                <h2 id="modalTitleUser" class="text-2xl font-bold mb-4 flex items-center gap-2">
+                    <i class="bi bi-person-plus-fill text-indigo-600"></i>
+                    Nuevo Usuario
+                </h2>
 
-		        <form id="userForm" novalidate th:action="@{/admin/usuarios/guardar}"  method="post">
+                <form id="userForm" novalidate th:action="@{/admin/usuarios/guardar}"  method="post">
 
-		            <input type="hidden" id="userId" name="id">
+                    <input type="hidden" id="userId" name="id">
 
-		            <!-- Usuario -->
-		            <div class="mb-3">
-		                <label class="block font-semibold mb-1">Usuario</label>
-		                <input type="text" id="usuario" name="usuario"
-		                       class="w-full border rounded p-2" required>
-		            </div>
+                    <!-- Usuario -->
+                    <div class="mb-3">
+                        <label class="block font-semibold mb-1">Usuario</label>
+                        <input type="text" id="usuario" name="usuario"
+                               class="w-full border rounded p-2" placeholder="Ingrese nombre de usuario" required>
+                    </div>
 
-		            <!-- Contraseña -->
-		            <div class="mb-3">
-		                <label class="block font-semibold mb-1">Contraseña</label>
-		                <input type="password" id="contrasena" name="contrasena"
-		                       class="w-full border rounded p-2" placeholder="Nueva contraseña" required>
-		            </div>
+                    <!-- Contraseña -->
+                    <div class="mb-3">
+                        <label class="block font-semibold mb-1">Contraseña</label>
+                        <input type="password" id="contrasena" name="contrasena"
+                               class="w-full border rounded p-2" placeholder="Nueva contraseña" required>
+                    </div>
 
-		            <!-- Confirmar Contraseña -->
-		            <div class="mb-3">
-		                <label class="block font-semibold mb-1">Confirmar Contraseña</label>
-		                <input type="password" id="confirmarContrasena" name="confirmarContrasena"
-		                       class="w-full border rounded p-2" placeholder="Repite la contraseña" required>
-		            </div>
+                    <!-- Confirmar Contraseña -->
+                    <div class="mb-3">
+                        <label class="block font-semibold mb-1">Confirmar Contraseña</label>
+                        <input type="password" id="confirmarContrasena" name="confirmarContrasena"
+                               class="w-full border rounded p-2" placeholder="Repite la contraseña" required>
+                    </div>
 
-		            <!-- Rol -->
-					<div class="mb-3">
-					    <label class="block font-semibold mb-1">Rol</label>
-					    <select id="roles" name="rolId"
-					            class="w-full border rounded p-2">
-					        <option th:each="r : ${roles}"
-					                th:value="${r.id}"
-					                th:text="${r.nombre}"
-					                th:selected="${r.nombre == rolPrincipal}">
-					        </option>
-					    </select>
-					</div>
+                    <!-- Rol -->
+                    <div class="mb-3">
+                        <label class="block font-semibold mb-1">Rol</label>
+                        <select id="roles" name="rolId"
+                                class="w-full border rounded p-2">
+                            <option th:each="r : ${roles}"
+                                    th:value="${r.id}"
+                                    th:text="${r.nombre}"
+                                    th:selected="${r.nombre == rolPrincipal}">
+                            </option>
+                        </select>
+                    </div>
 
-		            <!-- Habilitado -->
-		            <div class="mb-3">
-		                <label class="block font-semibold mb-1">Estado</label>
-		                <select id="habilitado" name="habilitado"
-		                        class="w-full border rounded p-2">
-		                    <option value="true">Activo</option>
-		                    <option value="false">Inactivo</option>
-		                </select>
-		            </div>
+                    <!-- Habilitado -->
+                    <div class="mb-3">
+                        <label class="block font-semibold mb-1">Estado</label>
+                        <select id="habilitado" name="habilitado"
+                                class="w-full border rounded p-2">
+                            <option value="true">Activo</option>
+                            <option value="false">Inactivo</option>
+                        </select>
+                    </div>
 
-		            <div class="flex justify-end gap-3 mt-4">
-		                <button type="button" onclick="closeUserModal()"
-		                        class="bg-gray-400 text-white px-4 py-2 rounded">
-		                    Cancelar
-		                </button>
+                    <div class="flex justify-end gap-3 mt-4">
+                        <button type="button" onclick="closeUserModal()"
+                                class="bg-gray-400 text-white px-4 py-2 rounded flex items-center gap-1">
+                            <i class="bi bi-x-lg"></i> Cancelar
+                        </button>
 
-		                <button type="submit"
-		                        class="bg-indigo-600 text-white px-4 py-2 rounded">
-		                    Guardar
-		                </button>
-		            </div>
+                        <button type="submit"
+                                class="bg-indigo-600 text-white px-4 py-2 rounded flex items-center gap-1">
+                            <i class="bi bi-check-lg"></i> Guardar
+                        </button>
+                    </div>
 
-		        </form>
+                </form>
 
-		    </div>
-		</div>
+            </div>
+        </div>
+		
+		
+
     </div>
+	<script src="/js/usuarios.js"></script>
 </div>

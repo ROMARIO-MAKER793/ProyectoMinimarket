@@ -142,4 +142,15 @@
 		        </tbody>
 		    </table>
 		</div>
+		
+		<!-- Variables que vienen de Thymeleaf -->
+		<script th:inline="javascript">
+		    window.ventasData = /*[[${ventas}]]*/ [];
+		    window.ventasPorDiaData = /*[[${ventasPorDia}]]*/ [];
+		    window.topProductosData = /*[[${topProductos}]]*/ [];
+		</script>
+
+		<!-- Script específico de reportes -->
+		<script th:src="@{/js/reportes.js}"></script>
 </div>
+

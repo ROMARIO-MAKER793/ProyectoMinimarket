@@ -15,47 +15,52 @@
         <!-- KPIs -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-            <div class="bg-white rounded-2xl shadow-lg p-6 flex justify-between items-center">
+            <div class="bg-gradient-to-r from-green-500 to-emerald-600 
+				                text-white p-5 rounded-2xl shadow-lg 
+				                flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500">Productos</p>
-                    <h2 class="text-3xl font-bold text-gray-800 mt-2"
-                        th:text="${totalProductos}">0</h2>
+                    <p class="font-semibold">Productos</p>
+                    <h2 class="text-3xl font-bold mt-2" th:text="${totalProductos}">0</h2>
                 </div>
-                <div class="bg-blue-100 p-4 rounded-xl">
-                    <i class="bi bi-box text-3xl text-blue-600"></i>
+                <div class="bg-blue-100/30 p-4 rounded-xl">
+                    <i class="bi bi-box text-3xl"></i>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-lg p-6 flex justify-between items-center">
+            <div class="bg-gradient-to-r from-purple-500 to-fuchsia-600 
+				                text-white p-5 rounded-2xl shadow-lg 
+				                flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500">Categorías</p>
-                    <h2 class="text-3xl font-bold text-gray-800 mt-2"
-                        th:text="${totalCategorias}">0</h2>
+                    <p class="font-semibold">Categorías</p>
+                    <h2 class="text-3xl font-bold mt-2" th:text="${totalCategorias}">0</h2>
                 </div>
-                <div class="bg-green-100 p-4 rounded-xl">
-                    <i class="bi bi-tags text-3xl text-green-600"></i>
+                <div class="bg-green-100/30 p-4 rounded-xl">
+                    <i class="bi bi-tags text-3xl"></i>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-lg p-6 flex justify-between items-center">
+            <div class=	"bg-gradient-to-r from-blue-500 to-indigo-600 
+				                text-white p-5 rounded-2xl shadow-lg 
+				                flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500">Ventas del Mes</p>
-                    <h2 class="text-3xl font-bold text-gray-800 mt-2"
+                    <p class="font-semibold">Ventas del Mes</p>
+                    <h2 class="text-3xl font-bold mt-2"
                         th:text="'S/ ' + ${#numbers.formatDecimal(ventasMes,1,2)}">S/ 0</h2>
                 </div>
-                <div class="bg-yellow-100 p-4 rounded-xl">
-                    <i class="bi bi-currency-dollar text-3xl text-yellow-600"></i>
+                <div class="bg-yellow-100/30 p-4 rounded-xl">
+                    <i class="bi bi-currency-dollar text-3xl"></i>
                 </div>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-lg p-6 flex justify-between items-center">
+            <div class=	"bg-gradient-to-r from-orange-500 to-amber-600 
+				                text-white p-5 rounded-2xl shadow-lg 
+				                flex items-center justify-between">
                 <div>
-                    <p class="text-gray-500">Usuarios</p>
-                    <h2 class="text-3xl font-bold text-gray-800 mt-2"
-                        th:text="${totalUsuarios}">0</h2>
+                    <p class="font-semibold">Usuarios</p>
+                    <h2 class="text-3xl font-bold mt-2" th:text="${totalUsuarios}">0</h2>
                 </div>
-                <div class="bg-purple-100 p-4 rounded-xl">
-                    <i class="bi bi-people-fill text-3xl text-purple-600"></i>
+                <div class="bg-purple-100/30 p-4 rounded-xl">
+                    <i class="bi bi-people-fill text-3xl"></i>
                 </div>
             </div>
 
@@ -99,30 +104,28 @@
                     Actividad Reciente
                 </h3>
 
-				<div class="bg-white rounded-lg shadow p-4 max-h-96 overflow-y-auto">
-				    <h3 class="text-lg font-semibold mb-3">Actividad Reciente</h3>
+                <div class="bg-gray-50 rounded-lg shadow p-4 max-h-96 overflow-y-auto">
+                    <h3 class="text-lg font-semibold mb-3">Actividad Reciente</h3>
 
-				    <div class="space-y-3">
-				        <div th:each="venta : ${actividadesRecientes}" 
-				             class="flex items-center gap-3 p-2 rounded hover:bg-gray-100 transition">
+                    <div class="space-y-3">
+                        <div th:each="venta : ${actividadesRecientes}" 
+                             class="flex items-center gap-3 p-2 rounded hover:bg-gray-100 transition">
 
-				            <!-- Ícono fijo para todas las ventas -->
-				            <i class="bi bi-cart-fill text-green-500 text-xl"></i>
+                            <i class="bi bi-cart-fill text-green-500 text-xl"></i>
 
-				            <!-- Contenido de la actividad -->
-				            <div class="flex-1">
-				                <p class="text-sm">
-				                    Venta realizada por 
-				                    <strong th:text="${venta.usuario.usuario}"></strong> 
-				                    por 
-				                    <strong th:text="'S/ ' + ${#numbers.formatDecimal(venta.total,1,2)}"></strong>
-				                </p>
-				                <p class="text-xs text-gray-400" th:text="${#temporals.format(venta.fecha,'dd/MM/yyyy HH:mm')}"></p>
-				            </div>
+                            <div class="flex-1">
+                                <p class="text-sm">
+                                    Venta realizada por 
+                                    <strong th:text="${venta.usuario.usuario}"></strong> 
+                                    por 
+                                    <strong th:text="'S/ ' + ${#numbers.formatDecimal(venta.total,1,2)}"></strong>
+                                </p>
+                                <p class="text-xs text-gray-400" th:text="${#temporals.format(venta.fecha,'dd/MM/yyyy HH:mm')}"></p>
+                            </div>
 
-				        </div>
-				    </div>
-				</div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
 
@@ -130,5 +133,13 @@
 
     </div>
 
-</div>
+	<script th:inline="javascript">
+	    window.ventasData = /*[[${ventasPorMes}]]*/ [];
+	    window.productosData = /*[[${productosMasVendidos}]]*/ [];
+	    window.categoriasData = /*[[${distribucionCategorias}]]*/ [];
+	    window.ventasMesData = /*[[${ventasDelMes}]]*/ [];
+	</script>
 
+	<script src="/js/dashboard.js"></script>
+
+</div>
