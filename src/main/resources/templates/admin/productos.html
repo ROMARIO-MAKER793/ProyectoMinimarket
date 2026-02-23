@@ -1,23 +1,44 @@
 <div th:fragment="contenido" class="space-y-10">
 
     <!-- HEADER -->
-    <div class="flex justify-between items-center">
-        <div class="flex flex-col">
-            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
-                <i class="bi bi-box-seam text-indigo-600"></i>
-                Gestión de Productos
-            </h1>
-            <p class="text-gray-600 text-lg mt-2">
-                Administra los productos del sistema
-            </p>
-        </div>
+	<div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+	    
+	    <div class="flex flex-col">
+	        <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+	            <i class="bi bi-box-seam text-indigo-600"></i>
+	            Gestión de Productos
+	        </h1>
+	        <p class="text-gray-600 text-base sm:text-lg mt-1 sm:mt-2">
+	            Administra los productos del sistema
+	        </p>
+	    </div>
+	    
+	    <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+	        
+	        <div class="relative w-full sm:w-[500px]">
+	            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+	                <i class="bi bi-search"></i>
+	            </span>
+	            <input type="text" id="buscadorTablaProductos" onkeyup="filtrarTablaProductos()" 
+	                   class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all text-sm" 
+	                   placeholder="Buscar por código, nombre o marca...">
+	        </div>
 
-        <button onclick="prepareCreate()"
-                class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-xl shadow-lg transition font-semibold flex items-center gap-2"
-                sec:authorize="hasRole('ADMIN')">
-            <i class="bi bi-plus-lg"></i> Nuevo Producto
-        </button>
-    </div>
+	        <button onclick="prepareCreate()"
+	                class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all font-semibold flex items-center justify-center gap-2 shrink-0"
+	                sec:authorize="hasRole('ADMIN')">
+	            <i class="bi bi-plus-lg stroke-2"></i> Nuevo Producto
+	        </button>
+	    </div>
+	</div>
+
+	<div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+	    <div class="overflow-x-auto">
+	        <table id="tablaProductos" class="min-w-full text-left text-sm whitespace-nowrap">
+	            
+	            </table>
+	    </div>
+	</div>
 
     <!-- TABLA -->
     <div class="bg-white rounded-2xl shadow-xl overflow-hidden">

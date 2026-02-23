@@ -14,6 +14,10 @@ import java.util.List;
 public interface VentaRepositorio extends JpaRepository<Venta, Long> {
 	
 	//CONSULTAS PARA DASHBOARD INICIO
+	
+	// OBTENER ÚLTIMO ID PARA GENERAR BOLETA
+    @Query("SELECT MAX(v.id) FROM Venta v")
+    Long obtenerMaximoId();
     // Total vendido en el mes actual
     @Query("""
         SELECT COALESCE (ROUND(SUM(v.total),2) ,0)

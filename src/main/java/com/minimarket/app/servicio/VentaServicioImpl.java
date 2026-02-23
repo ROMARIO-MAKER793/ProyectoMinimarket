@@ -110,9 +110,11 @@ public class VentaServicioImpl implements VentaServicio {
             Producto producto = productoRepositorio.findById(dto.getIdProducto())
                     .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-            // Validar stock
+         // Validar stock
             if (dto.getCantidad() > producto.getStockActual()) {
-                throw new RuntimeException("No hay suficiente stock de " + producto.getNombre());
+                throw new com.minimarket.app.excepciones.StockInsuficienteException(
+                    "Solo quedan " + producto.getStockActual() + " unidades de " + producto.getNombre() + " en almacén."
+                );
             }
 
             // Crear detalle
@@ -146,11 +148,12 @@ public class VentaServicioImpl implements VentaServicio {
     }
 
     
-    // Generar número de boleta secuencial
-    
+ // Generar número de boleta secuencial (VERSIÓN CORREGIDA)
     private String generarNumeroBoleta() {
-        long count = ventaRepositorio.count() + 1;
-        return String.format("B-%05d", count); // Ej: B-00001, B-00002
+        Long maxId = ventaRepositorio.obtenerMaximoId();
+        // Si maxId es null (la tabla está vacía), el siguiente será 1. Si no, le sumamos 1 al máximo.
+        long nextId = (maxId == null) ? 1 : maxId + 1; 
+        return String.format("B-%05d", nextId); // Ej: B-00001, B-00002
     }
 
     //Metodo para reportes

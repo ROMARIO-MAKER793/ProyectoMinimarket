@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+    <div th:fragment="chatbot">
+        
+        <div id="chatbot-container" class="fixed bottom-6 right-6 z-[9999]">
+            
+            <div id="chatbot-window" class="hidden flex-col w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 mb-4 overflow-hidden transition-all duration-300 origin-bottom-right">
+                <div class="bg-indigo-600 text-white p-4 flex justify-between items-center shadow-md">
+                    <div class="flex items-center gap-3">
+                        <div class="bg-white text-indigo-600 rounded-full p-2 flex items-center justify-center w-8 h-8">
+                            <i class="bi bi-robot text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold leading-tight text-sm">MiniBot Asistente</h3>
+                            <p class="text-xs text-indigo-200">En línea</p>
+                        </div>
+                    </div>
+                    <button id="chatbot-close" class="text-white hover:text-indigo-200 transition-colors">
+                        <i class="bi bi-x-lg text-lg"></i>
+                    </button>
+                </div>
+                
+                <div id="chatbot-messages" class="p-4 h-80 overflow-y-auto bg-gray-50 text-sm space-y-4">
+                    <div class="flex justify-start">
+                        <div class="bg-white border border-gray-200 text-gray-800 p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm">
+                            ¡Hola! 👋 Soy MiniBot, el asistente de BODEGAS FAMILIA. ¿En qué te puedo ayudar hoy?
+                        </div>
+                    </div>
+                    
+                    <div id="chatbot-options" class="flex flex-col gap-2 mt-2">
+                        <button onclick="enviarPregunta(1, '¿Cómo realizo una venta?')" class="bg-indigo-50 border border-indigo-100 text-indigo-700 p-2.5 rounded-xl hover:bg-indigo-600 hover:text-white text-left text-xs font-semibold transition-colors duration-200">
+                            🛒 ¿Cómo realizo una venta?
+                        </button>
+                        <button onclick="enviarPregunta(2, '¿Cómo exporto el historial?')" class="bg-indigo-50 border border-indigo-100 text-indigo-700 p-2.5 rounded-xl hover:bg-indigo-600 hover:text-white text-left text-xs font-semibold transition-colors duration-200">
+                            📊 ¿Cómo exporto el historial?
+                        </button>
+                        <button onclick="enviarPregunta(3, '¿Cómo agrego un producto?')" class="bg-indigo-50 border border-indigo-100 text-indigo-700 p-2.5 rounded-xl hover:bg-indigo-600 hover:text-white text-left text-xs font-semibold transition-colors duration-200">
+                            📦 ¿Cómo agrego un producto?
+                        </button>
+                        <button onclick="enviarPregunta(4, '¿Qué hago si falta stock?')" class="bg-indigo-50 border border-indigo-100 text-indigo-700 p-2.5 rounded-xl hover:bg-indigo-600 hover:text-white text-left text-xs font-semibold transition-colors duration-200">
+                            ⚠️ ¿Qué hago si falta stock?
+                        </button>
+                        <button onclick="enviarPregunta(5, '¿Cómo creo un nuevo cajero?')" class="bg-indigo-50 border border-indigo-100 text-indigo-700 p-2.5 rounded-xl hover:bg-indigo-600 hover:text-white text-left text-xs font-semibold transition-colors duration-200">
+                            👥 ¿Cómo creo un nuevo cajero?
+                        </button>
+                        <button onclick="enviarPregunta(6, '¿Dónde veo las ganancias?')" class="bg-indigo-50 border border-indigo-100 text-indigo-700 p-2.5 rounded-xl hover:bg-indigo-600 hover:text-white text-left text-xs font-semibold transition-colors duration-200">
+                            📈 ¿Dónde veo las ganancias?
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button id="chatbot-toggle" class="absolute bottom-0 right-0 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full w-14 h-14 shadow-lg transition-transform transform hover:scale-110 flex items-center justify-center">
+                <i class="bi bi-chat-dots-fill text-2xl"></i>
+            </button>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const toggleBtn = document.getElementById('chatbot-toggle');
+                const closeBtn = document.getElementById('chatbot-close');
+                const chatWindow = document.getElementById('chatbot-window');
+                const messagesContainer = document.getElementById('chatbot-messages');
+                const optionsContainer = document.getElementById('chatbot-options');
+
+                if(toggleBtn && closeBtn && chatWindow) {
+                    toggleBtn.addEventListener('click', () => {
+                        chatWindow.classList.remove('hidden');
+                        chatWindow.classList.add('flex');
+                        toggleBtn.classList.add('hidden');
+                    });
+
+                    closeBtn.addEventListener('click', () => {
+                        chatWindow.classList.add('hidden');
+                        chatWindow.classList.remove('flex');
+                        toggleBtn.classList.remove('hidden');
+                    });
+                }
+
+                const respuestas = {
+                    1: "Para realizar una venta, ve al menú <b>Punto de Venta</b>, busca el producto, presiona sobre él para agregarlo al ticket, ajusta la cantidad y presiona <b>Confirmar Venta</b>.",
+                    2: "¡Es muy fácil! Ve al menú <b>Historial Ventas</b> y en la parte superior derecha encontrarás los botones verdes y rojos para descargar el archivo en Excel o PDF.",
+                    3: "Ve al módulo de <b>Productos</b> y presiona el botón morado <b>'+ Nuevo Producto'</b>. Asegúrate de tener una imagen lista y asignarle una marca y categoría.",
+                    4: "El sistema bloqueará la venta automáticamente. Deberás comunicarte con el administrador para que registre un nuevo ingreso y actualice el stock.",
+                    5: "Ve al menú <b>Usuarios</b> (solo visible para Administradores), haz clic en '+ Nuevo Usuario', ingresa un nombre, contraseña y asígnale el rol de 'USER' para que pueda procesar ventas en caja.",
+                    6: "Tu pantalla principal o <b>Dashboard</b> procesa en tiempo real las ventas del mes, los productos más populares y la distribución por categorías mediante gráficas interactivas."
+                };
+
+                window.enviarPregunta = function(idPregunta, textoPregunta) {
+                    optionsContainer.style.display = 'none';
+
+                    messagesContainer.innerHTML += `
+                        <div class="flex justify-end mt-4">
+                            <div class="bg-indigo-600 text-white p-3 rounded-2xl rounded-tr-none max-w-[85%] shadow-sm text-xs">
+                                ${textoPregunta}
+                            </div>
+                        </div>
+                    `;
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+                    setTimeout(() => {
+                        messagesContainer.innerHTML += `
+                            <div class="flex justify-start mt-4">
+                                <div class="bg-white border border-gray-200 text-gray-800 p-3 rounded-2xl rounded-tl-none max-w-[85%] shadow-sm text-xs">
+                                    ${respuestas[idPregunta]}
+                                </div>
+                            </div>
+                        `;
+                        setTimeout(() => {
+                            messagesContainer.appendChild(optionsContainer);
+                            optionsContainer.style.display = 'flex';
+                            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                        }, 1000);
+                        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                    }, 800);
+                };
+            });
+        </script>
+    </div>
+</body>
+</html>

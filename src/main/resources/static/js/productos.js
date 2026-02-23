@@ -78,3 +78,27 @@ if (productForm) {
         if (!marca) { e.preventDefault(); Swal.fire("Debe seleccionar una marca"); return; }
     });
 }
+// ==========================================
+// FUNCIÓN PARA BUSCADOR EN TIEMPO REAL
+// ==========================================
+function filtrarTablaProductos() {
+    // 1. Obtener el texto escrito y pasarlo a minúsculas
+    let input = document.getElementById("buscadorTablaProductos").value.toLowerCase();
+    
+    // 2. Obtener todas las filas (tr) del cuerpo de la tabla
+    // Ajusta el selector si tu tabla tiene otro ID o estructura
+    let filas = document.querySelectorAll("table tbody tr");
+
+    // 3. Recorrer cada fila y ocultarla/mostrarla
+    filas.forEach(fila => {
+        // Obtenemos todo el texto de la fila (Código, Nombre, Categoría, Marca)
+        let textoFila = fila.textContent.toLowerCase();
+        
+        // Si el texto de la fila incluye lo que escribimos, se muestra, sino, se oculta
+        if (textoFila.includes(input)) {
+            fila.style.display = ""; // Muestra la fila
+        } else {
+            fila.style.display = "none"; // Oculta la fila
+        }
+    });
+}

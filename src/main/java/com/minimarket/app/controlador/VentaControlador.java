@@ -31,6 +31,8 @@ import com.lowagie.text.Font;
 import com.lowagie.text.pdf.*;
 import java.time.format.DateTimeFormatter;
 
+import com.minimarket.app.servicio.ExportacionServicio;
+
 
 @Controller
 @RequestMapping("admin/ventas")
@@ -41,7 +43,8 @@ public class VentaControlador {
 
     @Autowired
     private ProductoServicio productoServicio;
-    
+    @Autowired
+    private ExportacionServicio exportacionServicio;// <-- Inyectamos el nuevo servicio
     
     // LISTAR VENTAS / VENTANA DE VENTA
     
@@ -100,58 +103,22 @@ public class VentaControlador {
         return "layaout/admin_layaout";
     }
     
-    // ==========================================
-    // EXPORTAR A EXCEL
+ // ==========================================
+    // EXPORTAR A EXCEL (Refactorizado)
     // ==========================================
     @GetMapping("/exportar/excel")
     public void exportarExcel(HttpServletResponse response) throws Exception {
-        response.setContentType("application/octet-stream");
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         String headerKey = "Content-Disposition";
         String headerValue = "attachment; filename=historial_ventas.xlsx";
         response.setHeader(headerKey, headerValue);
 
         List<Venta> ventas = ventaServicio.listarTodos();
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Ventas");
-        
-     // Estilo para la cabecera
-        CellStyle headerStyle = workbook.createCellStyle();
-        org.apache.poi.ss.usermodel.Font headerFont = workbook.createFont(); // <-- ¡Aquí está el truco!
-        headerFont.setBold(true);
-        headerStyle.setFont(headerFont);
-
-        // Fila de Cabecera
-        Row headerRow = sheet.createRow(0);
-        String[] columnas = {"ID", "Fecha", "N° Boleta", "Cajero", "Total (S/)"};
-        for (int i = 0; i < columnas.length; i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(columnas[i]);
-            cell.setCellStyle(headerStyle);
-        }
-
-        // Llenar datos
-        int rowIdx = 1;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        for (Venta venta : ventas) {
-            Row row = sheet.createRow(rowIdx++);
-            row.createCell(0).setCellValue(venta.getId());
-            row.createCell(1).setCellValue(venta.getFecha() != null ? venta.getFecha().format(formatter) : "N/A");
-            row.createCell(2).setCellValue(venta.getNumeroBoleta());
-            row.createCell(3).setCellValue(venta.getUsuario() != null ? venta.getUsuario().getUsername() : "N/A");
-            row.createCell(4).setCellValue(venta.getTotal());
-        }
-
-        // Autoajustar columnas
-        for (int i = 0; i < columnas.length; i++) {
-            sheet.autoSizeColumn(i);
-        }
-
-        workbook.write(response.getOutputStream());
-        workbook.close();
+        exportacionServicio.exportarVentasExcel(ventas, response); // Delegamos la lógica
     }
 
     // ==========================================
-    // EXPORTAR A PDF
+    // EXPORTAR A PDF (Refactorizado)
     // ==========================================
     @GetMapping("/exportar/pdf")
     public void exportarPdf(HttpServletResponse response) throws Exception {
@@ -161,48 +128,6 @@ public class VentaControlador {
         response.setHeader(headerKey, headerValue);
 
         List<Venta> ventas = ventaServicio.listarTodos();
-
-        Document document = new Document(PageSize.A4);
-        PdfWriter.getInstance(document, response.getOutputStream());
-        document.open();
-
-        // Título del PDF
-        Font fontTitle = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 18);
-        Paragraph title = new Paragraph("Reporte de Ventas - BODEGAS FAMILIA", fontTitle);
-        title.setAlignment(Paragraph.ALIGN_CENTER);
-        title.setSpacingAfter(20);
-        document.add(title);
-
-        // Tabla PDF
-        PdfPTable table = new PdfPTable(5); // 5 columnas
-        table.setWidthPercentage(100);
-        table.setWidths(new float[]{1f, 2.5f, 2f, 2.5f, 1.5f}); // Proporción de ancho de columnas
-
-        // Cabeceras de la tabla
-        String[] columnas = {"ID", "Fecha", "N° Boleta", "Cajero", "Total (S/)"};
-        Font fontHeader = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12);
-        for (String col : columnas) {
-            PdfPCell cell = new PdfPCell(new Phrase(col, fontHeader));
-            cell.setHorizontalAlignment(Element.ALIGN_CENTER);
-            cell.setBackgroundColor(new java.awt.Color(230, 230, 230)); // Gris claro
-            table.addCell(cell);
-        }
-
-        // Llenar datos en el PDF
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
-        Font fontData = FontFactory.getFont(FontFactory.HELVETICA, 11);
-        for (Venta venta : ventas) {
-            table.addCell(new PdfPCell(new Phrase(String.valueOf(venta.getId()), fontData)));
-            table.addCell(new PdfPCell(new Phrase(venta.getFecha() != null ? venta.getFecha().format(formatter) : "N/A", fontData)));
-            table.addCell(new PdfPCell(new Phrase(venta.getNumeroBoleta() != null ? venta.getNumeroBoleta() : "N/A", fontData)));
-            table.addCell(new PdfPCell(new Phrase(venta.getUsuario() != null ? venta.getUsuario().getUsername() : "N/A", fontData)));
-            
-            PdfPCell cellTotal = new PdfPCell(new Phrase(String.valueOf(venta.getTotal()), fontData));
-            cellTotal.setHorizontalAlignment(Element.ALIGN_RIGHT);
-            table.addCell(cellTotal);
-        }
-
-        document.add(table);
-        document.close();
+        exportacionServicio.exportarVentasPdf(ventas, response); // Delegamos la lógica
     }
 }
