@@ -10,7 +10,6 @@ import com.minimarket.app.entidad.Usuario;
 
 import com.minimarket.app.repositorio.ProductoRepositorio;
 import com.minimarket.app.repositorio.VentaRepositorio;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,25 +25,27 @@ import java.util.Map;
 @Transactional
 public class VentaServicioImpl implements VentaServicio {
 
-    @Autowired
-    private VentaRepositorio ventaRepositorio;
-
-
     
-    @Autowired
+    private final VentaRepositorio ventaRepositorio;
+
     private UsuarioServicio usuarioServicio;
     
-    
-   
-    @Autowired
     private ProductoRepositorio productoRepositorio;
     
+    
+  
+    public VentaServicioImpl(VentaRepositorio ventaRepositorio, UsuarioServicio usuarioServicio,
+			ProductoRepositorio productoRepositorio) {
+		super();
+		this.ventaRepositorio = ventaRepositorio;
+		this.usuarioServicio = usuarioServicio;
+		this.productoRepositorio = productoRepositorio;
+	}
 
-
- 
+    
     // Guardar venta simple
     
-    @Override
+	@Override
     public Venta guardar(Venta venta) {
         return ventaRepositorio.save(venta);
     }
