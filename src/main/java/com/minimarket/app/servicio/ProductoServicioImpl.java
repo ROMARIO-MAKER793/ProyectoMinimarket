@@ -1,18 +1,12 @@
 package com.minimarket.app.servicio;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+
 import java.util.List;
-
-
-
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.minimarket.app.entidad.Producto;
 import com.minimarket.app.repositorio.ProductoRepositorio;
 
@@ -29,7 +23,9 @@ public class ProductoServicioImpl implements ProductoServicio {
     
     @Autowired
     private MarcaServicio marcaServicio;
-
+    
+    @Autowired
+    private ImagenService imagenService;
     
 
 
@@ -80,10 +76,17 @@ public class ProductoServicioImpl implements ProductoServicio {
 
         // Manejo de imagen
         if (imagenFile != null && !imagenFile.isEmpty()) {
-            String nombreArchivo = imagenFile.getOriginalFilename();
-            Path ruta = Paths.get("src/main/resources/static/img/productos/" + nombreArchivo);
-            Files.write(ruta, imagenFile.getBytes());
-            producto.setImagenUrl("/img/productos/" + nombreArchivo);
+        	
+        	String imagenUrl = imagenService.subirImagen(imagenFile);
+        	producto.setImagenUrl(imagenUrl);
+			/*
+			 * antes de clodinary
+			 * String nombreArchivo = imagenFile.getOriginalFilename(); Path ruta =
+			 * Paths.get("src/main/resources/static/img/productos/" + nombreArchivo);
+			 * Files.write(ruta, imagenFile.getBytes());
+			 * producto.setImagenUrl("/img/productos/" + nombreArchivo);
+			 */
+        //    
         } else if (!esNuevo) {
             // Mantener imagen existente al editar
             Producto existente = buscarPorId(producto.getId());
