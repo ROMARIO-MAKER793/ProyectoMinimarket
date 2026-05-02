@@ -28,7 +28,13 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
+        	//se añadio csrf para desahiblitar y entrar con postaman
+        	.csrf(csrf -> csrf.ignoringRequestMatchers("/api/**"))
             .authorizeHttpRequests(auth -> auth
+            		
+            	//PARA PROBAR CON POSTMAN
+            	.requestMatchers("/api/**").permitAll()
+            		
                 // Rutas públicas
                 .requestMatchers("/login", "/css/*", "/js/", "/images/*").permitAll()
 
