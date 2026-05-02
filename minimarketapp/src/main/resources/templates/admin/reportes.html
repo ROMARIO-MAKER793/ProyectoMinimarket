@@ -1,0 +1,156 @@
+<div th:fragment="contenido" class="space-y-6">
+
+	<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+	    <!-- Ventas del Día -->
+	    <div class="bg-gradient-to-r from-green-500 to-emerald-600 
+	                text-white p-5 rounded-2xl shadow-lg 
+	                flex items-center justify-between">
+	        <div>
+	            <p class="text-sm opacity-80 font-medium">Ventas del Día</p>
+	            <h3 class="text-3xl font-extrabold mt-1">
+	                S/ <span th:text="${#numbers.formatDecimal(ventasHoy,1,2)}">0.00</span>
+	            </h3>
+	        </div>
+	        <div class="bg-white/20 p-4 rounded-full">
+	            <i class="bi bi-cash-stack text-2xl"></i>
+	        </div>
+	    </div>
+
+	    <!-- Ventas del Mes -->
+	    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 
+	                text-white p-5 rounded-2xl shadow-lg 
+	                flex items-center justify-between">
+	        <div>
+	            <p class="text-sm opacity-80 font-medium">Ventas del Mes</p>
+	            <h3 class="text-3xl font-extrabold mt-1">
+	                S/ <span th:text="${#numbers.formatDecimal(ventasMes,1,2)}">0.00</span>
+	            </h3>
+	        </div>
+	        <div class="bg-white/20 p-4 rounded-full">
+	            <i class="bi bi-calendar-month text-2xl"></i>
+	        </div>
+	    </div>
+
+	    <!-- Cantidad de Ventas -->
+	    <div class="bg-gradient-to-r from-purple-500 to-fuchsia-600 
+	                text-white p-5 rounded-2xl shadow-lg 
+	                flex items-center justify-between">
+	        <div>
+	            <p class="text-sm opacity-80 font-medium">Ventas Realizadas</p>
+	            <h3 class="text-3xl font-extrabold mt-1"
+	                th:text="${cantidadVentas}">0</h3>
+	        </div>
+	        <div class="bg-white/20 p-4 rounded-full">
+	            <i class="bi bi-receipt text-2xl"></i>
+	        </div>
+	    </div>
+
+	    <!-- Productos Vendidos -->
+	    <div class="bg-gradient-to-r from-orange-500 to-amber-600 
+	                text-white p-5 rounded-2xl shadow-lg 
+	                flex items-center justify-between">
+	        <div>
+	            <p class="text-sm opacity-80 font-medium">Productos Vendidos</p>
+	            <h3 class="text-3xl font-extrabold mt-1"
+	                th:text="${productosVendidos}">0</h3>
+	        </div>
+	        <div class="bg-white/20 p-4 rounded-full">
+	            <i class="bi bi-box-seam text-2xl"></i>
+	        </div>
+	    </div>
+
+	</div>
+	
+	<div class="p-6 bg-white shadow rounded-lg">
+    <h2 class="text-xl font-bold mb-4 flex items-center gap-2">
+        <i class="bi bi-bar-chart-line-fill text-green-500"></i>
+        Ventas del Mes
+    </h2>
+
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="px-4 py-2 text-left text-gray-600">Producto</th>
+                    <th class="px-4 py-2 text-left text-gray-600">Cantidad Vendida</th>
+                    <th class="px-4 py-2 text-left text-gray-600">Total Vendido</th>
+                    <th class="px-4 py-2 text-left text-gray-600">Última Venta</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                <tr th:each="venta : ${ventas}">
+                    <td class="px-4 py-2" th:text="${venta.producto}"></td>
+                    <td class="px-4 py-2" th:text="${venta.cantidadVendida}"></td>
+                    <td class="px-4 py-2" th:text="${#numbers.formatDecimal(venta.totalVendido,1,2)}"></td>
+                    <td class="px-4 py-2" th:text="${#temporals.format(venta.fechaUltimaVenta,'dd/MM/yyyy HH:mm')}"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+	
+	<!-- Gráfico -->
+		<div class="bg-white p-6 rounded-xl shadow-md">
+		    <canvas id="ventasMesChartReportes" height="120"></canvas>
+		</div>
+</div>
+
+		
+		<div class="bg-white p-6 rounded-xl shadow-md mt-6 h-80">
+		    <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+		        <i class="bi bi-graph-up-arrow text-blue-500"></i>
+		        Tendencia de Ventas del Mes
+		    </h3>
+		    <canvas id="ventasDiaChart" height="100"></canvas>
+		</div>
+		
+		
+		<div class="bg-white p-6 rounded-xl shadow-md mt-6 h-80">
+		    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+		        <i class="bi bi-trophy-fill text-yellow-500"></i>
+		        Top 5 Productos del Mes
+		    </h3>
+		    <canvas id="topProductosChart"></canvas>
+		</div>
+		
+		<div class="bg-white p-6 rounded-xl shadow-md mt-6">
+		    <h3 class="text-lg font-semibold mb-4 flex items-center gap-2 text-red-600">
+		        <i class="bi bi-exclamation-triangle-fill"></i>
+		        Productos en Alerta (Stock menor a 20)
+		    </h3>
+
+		    <div th:if="${#lists.isEmpty(productosAlerta)}"
+		         class="text-green-600 font-medium">
+		        ✅ No hay productos en alerta
+		    </div>
+
+		    <table th:if="${!#lists.isEmpty(productosAlerta)}"
+		           class="min-w-full text-sm text-left">
+		        <thead class="border-b">
+		            <tr>
+		                <th class="py-2">Producto</th>
+		                <th class="py-2">Stock Actual</th>
+		            </tr>
+		        </thead>
+		        <tbody>
+		            <tr th:each="p : ${productosAlerta}"
+		                class="border-b hover:bg-red-50">
+		                <td class="py-2 font-medium" th:text="${p.nombre}"></td>
+		                <td class="py-2 text-red-600 font-bold"
+		                    th:text="${p.stockActual}"></td>
+		            </tr>
+		        </tbody>
+		    </table>
+		</div>
+		
+		<!-- Variables que vienen de Thymeleaf -->
+		<script th:inline="javascript">
+		    window.ventasData = /*[[${ventas}]]*/ [];
+		    window.ventasPorDiaData = /*[[${ventasPorDia}]]*/ [];
+		    window.topProductosData = /*[[${topProductos}]]*/ [];
+		</script>
+
+		<!-- Script específico de reportes -->
+		<script th:src="@{/js/reportes.js}"></script>
+</div>
+

@@ -1,0 +1,57 @@
+<div th:fragment="contenido" class="space-y-6">
+
+    <div class="flex flex-col md:flex-row justify-between items-center bg-white p-5 rounded-xl shadow-sm border border-gray-100">
+        <div class="mb-4 md:mb-0">
+            <h1 class="text-3xl font-extrabold text-gray-800 tracking-tight">Historial de Ventas</h1>
+            <p class="text-gray-500 text-sm mt-1">Consulta y exporta todos los registros financieros</p>
+        </div>
+        
+        <div class="flex gap-3">
+            <a th:href="@{/admin/ventas/exportar/excel}" 
+               class="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-4 rounded-lg inline-flex items-center shadow-sm transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Exportar Excel
+            </a>
+            <a th:href="@{/admin/ventas/exportar/pdf}" 
+               class="bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-4 rounded-lg inline-flex items-center shadow-sm transition-colors">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+                Exportar PDF
+            </a>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-800 text-white">
+                    <tr>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">ID Venta</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Fecha y Hora</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">N° Boleta</th>
+                        <th class="px-6 py-4 text-left text-xs font-bold uppercase tracking-wider">Cajero</th>
+                        <th class="px-6 py-4 text-right text-xs font-bold uppercase tracking-wider">Total</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    <tr th:each="v : ${ventas}" class="hover:bg-gray-50 transition-colors">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 font-medium" th:text="${v.id}"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800" th:text="${#temporals.format(v.fecha, 'dd/MM/yyyy HH:mm')}"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm">
+                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800" th:text="${v.numeroBoleta}"></span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 capitalize" th:text="${v.usuario.usuario}"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-right font-black text-green-600" th:text="'S/ ' + ${#numbers.formatDecimal(v.total, 1, 2)}"></td>
+                    </tr>
+                    
+                    <tr th:if="${#lists.isEmpty(ventas)}">
+                        <td colspan="5" class="px-6 py-10 text-center text-gray-400">
+                            <svg class="mx-auto h-12 w-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            Aún no hay registros de ventas.
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>

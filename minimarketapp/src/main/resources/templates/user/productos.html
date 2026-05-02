@@ -1,0 +1,90 @@
+<div th:fragment="contenido" class="space-y-10">
+
+    <!-- HEADER MEJORADO -->
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-4xl font-extrabold text-gray-900 tracking-tight">
+               Gestión de Productos
+            </h1>
+            <p class="text-gray-600 text-lg mt-2">
+                Productos Disponibles
+            </p>
+        </div>
+
+		
+    </div>
+
+    <!-- TABLA -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+
+        <table class="min-w-full divide-y divide-gray-200">
+
+            <thead class="bg-gray-100">
+            <tr>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase">ID</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase">Nombre</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase">Precio</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase">Stock</th>
+                <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase">Categoría</th>
+				<th class="px-6 py-4 text-left text-sm font-bold text-gray-700 uppercase">Marca</th>
+                <th class="px-6 py-4 text-center text-sm font-bold text-gray-700 uppercase">Imagen</th>
+				
+            </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-100">
+
+            <!-- LISTADO REAL -->
+            <tr th:each="producto : ${productos}" class="hover:bg-gray-50">
+
+                <td class="px-6 py-4 font-medium"
+                    th:text="${producto.id}">
+                </td>
+
+                <td class="px-6 py-4 font-semibold text-gray-800"
+                    th:text="${producto.nombre}">
+                </td>
+
+                <td class="px-6 py-4 font-bold text-green-600"
+                    th:text="'S/ ' + ${#numbers.formatDecimal(producto.precio, 1 , 2)}">
+                </td>
+
+                <td class="px-6 py-4">
+                    <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold"
+                          th:text="${producto.stockActual}">
+                    </span>
+                </td>
+
+                <td class="px-6 py-4 text-gray-600 font-medium"
+                    th:text="${producto.categoria !=null ? producto.categoria.nombre : 'Sin Categoría'}">
+                </td>
+				
+				<td class="px-6 py-4 text-gray-600 font-medium"
+				    th:text="${producto.marca !=null ? producto.marca.nombre : 'Sin Marca'}">
+				 </td>
+
+                <!-- IMAGEN AL FINAL -->
+                <td class="px-6 py-4">
+                    <img th:if="${producto.imagenUrl != null}"
+                         th:src="@{${producto.imagenUrl}}"
+                         class="w-14 h-14 min-w-full rounded-lg shadow object-contain">
+                </td>
+
+	
+
+            </tr>
+
+            <!-- SI NO HAY PRODUCTOS -->
+            <tr th:if="${#lists.isEmpty(productos)}">
+                <td colspan="7" class="text-center py-10 text-gray-400 text-lg">
+                    No hay productos registrados
+                </td>
+            </tr>
+
+            </tbody>
+
+        </table>
+		
+		
+    </div>
+</div>

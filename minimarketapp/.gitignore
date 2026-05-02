@@ -1,0 +1,49 @@
+# --- [ 1. JAVA & SPRING BOOT ] ---
+# Ignorar binarios y carpetas de compilación (Nunca se suben)
+target/
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# --- [ 2. LOMBOK & JPA ] ---
+# Archivos temporales que generan las anotaciones y el motor de persistencia
+.apt_generated/
+.factorypath
+bin/
+
+# --- [ 3. MAVEN WRAPPER ] ---
+# NO ignoramos estos para que la app corra en cualquier PC sin instalar Maven
+!mvnw
+!mvnw.cmd
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**
+!**/src/test/**
+
+# --- [ 4. IDEs (IntelliJ, VS Code, Eclipse) ] ---
+# Evita que tus rutas locales se mezclen con las de tus compañeros
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+.vscode/
+.settings/
+.classpath
+.project
+.springBeans
+.sts4-cache
+
+# --- [ 5. SEGURIDAD Y CONFIG LOCAL ] ---
+# Si creas perfiles de desarrollo con claves reales, ignóralos
+application-dev.properties
+application-local.properties
+application-dev.yml
+application-local.yml
+.env
+.env.local
+
+# --- [ 6. SISTEMA OPERATIVO ] ---
+.DS_Store
+Thumbs.db
