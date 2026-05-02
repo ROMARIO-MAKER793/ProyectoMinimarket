@@ -1,14 +1,14 @@
 package com.minimarket.app.entidad;
 
-
 import jakarta.validation.constraints.*;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Table(name = "productos")
-@Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
+@Inheritance(strategy = InheritanceType.JOINED) //estrategia de tablas separadas unidas por ID
+@Data // Lombok 
 public class Producto {
 
     @Id
@@ -17,7 +17,6 @@ public class Producto {
     
     @NotBlank(message = "El nombre es obligatorio")
     private String nombre;
-    
     
     @Column(length = 500)
     private String descripcion;
@@ -35,16 +34,15 @@ public class Producto {
     @Column(nullable = false)
     private boolean activo = true;
 
-    // NUEVO CAMPO IMAGEN
     private String imagenUrl;
     
     @NotNull(message = "La categoría es obligatoria")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY) // Recomendado agregar LAZY para mejorar rendimiento
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
     
     @NotNull(message = "La marca es obligatoria")
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "marca_id")
     private Marca marca;
 }
