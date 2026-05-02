@@ -37,7 +37,7 @@ public class Producto {
     private String imagenUrl;
     
     @NotNull(message = "La categoría es obligatoria")
-    @ManyToOne(fetch = FetchType.LAZY) // Recomendado agregar LAZY para mejorar rendimiento
+    @ManyToOne(fetch = FetchType.LAZY) //LAZY para mejorar rendimiento
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
     

@@ -1,75 +1,82 @@
 package com.minimarket.app.config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-
-
+import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-	@Autowired
-    private LoginSuccess loginSuccessHandler; // Usar handler
-
     @Bean
-    PasswordEncoder passwordEncoder() {
+    public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+        // 1. Habilitar CORS con la configuración de abajo
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+         // 2. Deshabilitar CSRF (estándar cuando trabajamos con APIs y Angular)
+            .csrf(csrf -> csrf.disable())
+         // 3. Reglas de rutas
             .authorizeHttpRequests(auth -> auth
-                // Rutas públicas
-                .requestMatchers("/login", "/css/*", "/js/", "/images/*").permitAll()
+                
+                // RUTAS PÚBLICAS
+                .requestMatchers("/api/auth/login", "/img/**").permitAll()
 
                 // PRODUCTOS
-                .requestMatchers("/admin/productos").hasAnyRole("ADMIN", "USER")
-                .requestMatchers("/user/productos").hasRole("USER") // Nuevo endpoint para user
+                // GET (Listar) permitido para ADMIN y USER
+                .requestMatchers(HttpMethod.GET, "/api/productos/**").hasAnyRole("ADMIN", "USER")
+                // POST y DELETE (Crear, Editar, Eliminar) solo para ADMIN
+                .requestMatchers(HttpMethod.POST, "/api/productos/guardar").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/productos/eliminar/**").hasRole("ADMIN")
 
                 // VENTAS
-                .requestMatchers("/admin/ventas").hasAnyRole("ADMIN", "USER")
-                .requestMatchers("/admin/ventas/crear").hasAnyRole("ADMIN", "USER")// permite al user tambien procesar venta
-                .requestMatchers("/admin/ventas/guardar").hasRole("ADMIN") // form anticucho
-                .requestMatchers("/admin/ventas/eliminar/**").hasRole("ADMIN")
-                .requestMatchers("/admin/ventas/historial").hasRole("ADMIN")
-                .requestMatchers("/admin/ventas/exportar/**").hasRole("ADMIN")
-                
-                // PRODUCTOS (solo admin puede modificar)
-                .requestMatchers("/admin/productos/guardar").hasRole("ADMIN")
-                .requestMatchers("/admin/productos/editar/**").hasRole("ADMIN")
-                .requestMatchers("/admin/productos/eliminar/**").hasRole("ADMIN")
+                // GET (Historial) y Exportaciones solo ADMIN
+                .requestMatchers(HttpMethod.GET, "/api/ventas/historial", "/api/ventas/exportar/**").hasRole("ADMIN")
+                // POST (Crear Venta) permitido para ADMIN y USER
+                .requestMatchers(HttpMethod.POST, "/api/ventas/guardar").hasAnyRole("ADMIN", "USER")
+                // DELETE (Eliminar Venta) solo ADMIN
+                .requestMatchers(HttpMethod.DELETE, "/api/ventas/eliminar/**").hasRole("ADMIN")
 
-                // DASHBOARD solo ADMIN
-                .requestMatchers("/admin/dashboard").hasRole("ADMIN")
-
-                // Cualquier otra requiere autenticación
+                // Cualquier otra petición requiere autenticación
                 .anyRequest().authenticated()
             )
-
-            .formLogin(form -> form
-                .loginPage("/login")
-                .successHandler(loginSuccessHandler) // Usamos tu handler
-                .permitAll()
-            )
-            	//JSESSIONID para borrar las cookies y no pueda ingresar el usuario
+         // 4. Configurar el Logout para REST (sin HTML)
             .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/login?logout")
+                .logoutUrl("/api/auth/logout")
+                .logoutSuccessHandler((req, res, auth) -> res.setStatus(200))
                 .invalidateHttpSession(true)
                 .deleteCookies("JSESSIONID")
-                .permitAll()
             );
 
         return http.build();
+    }
+
+    
+    // Configuración vital para que Angular y Spring compartan la cookie
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("http://localhost:4200")); 
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true); 
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

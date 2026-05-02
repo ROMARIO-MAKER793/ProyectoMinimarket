@@ -13,24 +13,43 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestController // <-- Cambiado
-@RequestMapping("/api/productos") // <-- Cambiado
+@RestController 
+@RequestMapping("/api/productos") 
 @CrossOrigin(origins = "http://localhost:4200")
 public class ProductoRestControlador {
 
     @Autowired
     private ProductoServicio productoServicio;
 
-    // LISTAR PRODUCTOS
-    @GetMapping 
-    public ResponseEntity<List<Producto>> listar() {
-        // En REST ya no enviamos las listas de categorías o marcas aquí. 
-        // Angular hará peticiones GET separadas a CategoriaControlador y MarcaControlador si las necesita.
+    
+  //LISTAR TODOS LOS PRODUCTOS
+  	@GetMapping
+  	public ResponseEntity<List<Producto>>listar(){
+  		
+  		return  ResponseEntity.ok(productoServicio.listarTodos());
+  		
+  	}
+    // LISTAR PRODUCTOS ACTIVOS
+    @GetMapping("/activos")
+    public ResponseEntity<List<Producto>> listarActivos() {
+      
         return ResponseEntity.ok(productoServicio.listarActivos());
     }
 
-    // GUARDAR (CREAR / EDITAR)
-    // Usamos POST. En Angular, enviaremos esto como un FormData porque incluye un archivo (imagen)
+ // BUSCAR POR ID
+    @GetMapping("/{id}")
+    public ResponseEntity<Producto> obtenerPorId(@PathVariable Long id) {
+        Producto producto = productoServicio.buscarPorId(id);
+        if (producto != null) {
+            return ResponseEntity.ok(producto); 
+        } else {
+            return ResponseEntity.notFound().build(); 
+        }
+    }
+    
+    
+    // GUARDAR (CREAR / EDITAR) aqui combino ambos metodos porla imgg
+    //metodo post,en Angular se envia esto como un FormData porque incluye un archivo (imagen)
     @PostMapping("/guardar")
     public ResponseEntity<Map<String, Object>> guardar(
             @Valid @ModelAttribute Producto producto, // Mantenemos ModelAttribute porque recibe FormData, no JSON crudo
@@ -51,7 +70,6 @@ public class ProductoRestControlador {
     }
 
     // ELIMINAR
-    // En REST la convención es usar el verbo DELETE
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<Map<String, Object>> eliminar(@PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
