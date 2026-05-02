@@ -1,0 +1,191 @@
+<div class="space-y-10 p-6">
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div class="flex flex-col">
+            <h1 class="text-3xl sm:text-4xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
+                <i class="bi bi-box-seam text-indigo-600"></i>
+                Gestión de Productos
+            </h1>
+            <p class="text-gray-600 text-base sm:text-lg mt-1 sm:mt-2">
+                Administra los productos del sistema
+            </p>
+        </div>
+        
+        <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+            <div class="relative w-full sm:w-[500px]">
+                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-500">
+                    <i class="bi bi-search"></i>
+                </span>
+                <!-- Conectado al TS con [(ngModel)] -->
+                <input type="text" [(ngModel)]="terminoBusqueda" (keyup)="filtrarTabla()"
+                       class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 shadow-sm transition-all text-sm" 
+                       placeholder="Buscar por código, nombre o marca...">
+            </div>
+
+            <!-- Mostrar botón solo si es administrador -->
+            @if (esAdmin) {
+                <button (click)="abrirModal()"
+                        class="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-xl shadow-md hover:shadow-lg transition-all font-semibold flex items-center justify-center gap-2 shrink-0">
+                    <i class="bi bi-plus-lg stroke-2"></i> Nuevo Producto
+                </button>
+            }
+        </div>
+    </div>
+
+    <!-- TABLA -->
+    <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-left text-sm whitespace-nowrap">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-6 py-4 font-bold text-gray-700 uppercase">ID</th>
+                        <th class="px-6 py-4 font-bold text-gray-700 uppercase">Nombre</th>
+                        <th class="px-6 py-4 font-bold text-gray-700 uppercase">Precio</th>
+                        <th class="px-6 py-4 font-bold text-gray-700 uppercase">Stock</th>
+                        <th class="px-6 py-4 font-bold text-gray-700 uppercase">Categoría</th>
+                        <th class="px-6 py-4 font-bold text-gray-700 uppercase">Marca</th>
+                        <th class="px-6 py-4 text-center font-bold text-gray-700 uppercase">Imagen</th>
+                        @if (esAdmin) {
+                            <th class="px-6 py-4 text-center font-bold text-gray-700 uppercase">Acciones</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-100">
+                    
+                    <!-- Bucle @for moderno de Angular -->
+                    @for (producto of productos; track producto.id) {
+                        <tr class="hover:bg-gray-50 min-h-[56px]">
+                            <td class="px-6 py-4 font-medium align-middle">{{ producto.id }}</td>
+
+                            <td class="px-6 py-4 font-semibold text-gray-800 align-middle">
+                                <div class="flex items-center gap-2 h-full">
+                                    <i class="bi bi-box text-indigo-500"></i>
+                                    <span>{{ producto.nombre }}</span>
+                                </div>
+                            </td>
+
+                            <!-- Pipe de moneda de Angular para formatear el S/ -->
+                            <td class="px-6 py-4 font-bold text-green-600 align-middle">
+                                {{ producto.precio | currency:'PEN':'S/ ':'1.2-2' }}
+                            </td>
+
+                            <td class="px-6 py-4 align-middle">
+                                <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-semibold">
+                                    {{ producto.stockActual }}
+                                </span>
+                            </td>
+
+                            <!-- Navegación segura con '?.' en caso de que vengan nulos -->
+                            <td class="px-6 py-4 text-gray-600 font-medium align-middle">
+                                {{ producto.categoria?.nombre || 'Sin Categoría' }}
+                            </td>
+
+                            <td class="px-6 py-4 text-gray-600 font-medium align-middle">
+                                {{ producto.marca?.nombre || 'Sin Marca' }}
+                            </td>
+
+                            <td class="px-6 py-4 text-center align-middle">
+                                @if (producto.imagenUrl) {
+                                    <img [src]="producto.imagenUrl" class="w-14 h-14 rounded-lg shadow object-contain mx-auto" alt="Producto">
+                                }
+                            </td>
+
+                            @if (esAdmin) {
+                                <td class="px-6 py-4 align-middle">
+                                    <div class="flex justify-center items-center gap-2 h-full">
+                                        <!-- Pasamos el objeto entero a la función -->
+                                        <button (click)="abrirModal(producto)"
+                                            class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1">
+                                            <i class="bi bi-pencil-fill"></i> Editar
+                                        </button>
+                                        <button (click)="eliminarProducto(producto.id)"
+                                            class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-1">
+                                            <i class="bi bi-trash-fill"></i> Eliminar
+                                        </button>
+                                    </div>
+                                </td>
+                            }
+                        </tr>
+                    } @empty {
+                        <!-- Si el array está vacío, se muestra esto automáticamente -->
+                        <tr>
+                            <td colspan="8" class="text-center py-10 text-gray-400 text-lg">No hay productos registrados</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <!-- Controlamos la visibilidad con la clase .hidden dependiento de mostrarModal -->
+    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 transition-opacity" [class.hidden]="!mostrarModal">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-2xl p-6 mx-4 sm:mx-auto">
+            <h2 class="text-2xl font-bold mb-4 flex items-center gap-2">
+                <i class="bi bi-box-seam text-indigo-600"></i>
+                {{ productoSeleccionado.id ? 'Editar Producto' : 'Nuevo Producto' }}
+            </h2>
+
+            <form (ngSubmit)="guardarProducto()" #productoForm="ngForm">
+                
+                <div class="mb-3">
+                    <label class="block font-semibold mb-1">Nombre</label>
+                    <input type="text" name="nombre" [(ngModel)]="productoSeleccionado.nombre" class="w-full border rounded p-2" placeholder="Ingrese nombre" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block font-semibold mb-1">Precio</label>
+                    <input type="number" name="precio" [(ngModel)]="productoSeleccionado.precio" step="0.01" min="0.01" class="w-full border rounded p-2" placeholder="S/ 0.00" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block font-semibold mb-1">Stock</label>
+                    <input type="number" name="stockActual" [(ngModel)]="productoSeleccionado.stockActual" class="w-full border rounded p-2" placeholder="20" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block font-semibold mb-1">Categoría</label>
+                    <select name="categoriaId" [(ngModel)]="productoSeleccionado.categoriaId" class="w-full border rounded p-2">
+                        <option [ngValue]="undefined">Seleccione</option>
+                        @for (cat of categorias; track cat.id) {
+                            <option [value]="cat.id">{{ cat.nombre }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block font-semibold mb-1">Marca</label>
+                    <select name="marcaId" [(ngModel)]="productoSeleccionado.marcaId" class="w-full border rounded p-2">
+                        <option [ngValue]="undefined">Seleccione</option>
+                        @for (mar of marcas; track mar.id) {
+                            <option [value]="mar.id">{{ mar.nombre }}</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block font-semibold mb-1">Descripción</label>
+                    <textarea name="descripcion" [(ngModel)]="productoSeleccionado.descripcion" rows="3" class="w-full border rounded p-2 resize-none" placeholder="Descripción del producto"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="block font-semibold mb-1">Imagen</label>
+                    @if (productoSeleccionado.imagenUrl) {
+                        <img [src]="productoSeleccionado.imagenUrl" class="w-20 h-20 rounded-lg shadow object-contain mb-2">
+                    }
+                    <input type="file" (change)="onFileSelected($event)" accept="image/*" class="w-full border rounded p-2">
+                </div>
+
+                <div class="flex justify-end gap-3 mt-4">
+                    <button type="button" (click)="cerrarModal()" class="bg-gray-400 text-white px-4 py-2 rounded flex items-center gap-1">
+                        <i class="bi bi-x-lg"></i> Cancelar
+                    </button>
+                    <!-- Se deshabilita si el form es inválido -->
+                    <button type="submit" [disabled]="!productoForm.form.valid" class="bg-indigo-600 disabled:bg-indigo-300 text-white px-4 py-2 rounded flex items-center gap-1">
+                        <i class="bi bi-check-lg"></i> Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
