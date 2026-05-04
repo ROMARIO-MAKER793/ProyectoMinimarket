@@ -3,6 +3,7 @@ package com.minimarket.app.controlador;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.minimarket.app.entidad.Producto;
 import com.minimarket.app.servicio.ProductoServicio;
 
+@CrossOrigin(origins = "http://localhost:59170")
 @RestController
 @RequestMapping("/api/productos")
 public class ProductoRestControlador {
@@ -58,7 +60,7 @@ public class ProductoRestControlador {
     public Producto actualizar(@PathVariable Long id, @RequestBody Producto producto) {
         try {
             producto.setId(id);
-            productoServicio.guardar(producto, null); // 👈 sin imagen
+            productoServicio.guardar(producto, null); // sin imagen
             return producto;
         } catch (Exception e) {
             throw new RuntimeException("Error al actualizar producto: " + e.getMessage());

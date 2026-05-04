@@ -1,5 +1,6 @@
 package com.minimarket.app.config;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,12 +13,26 @@ import com.cloudinary.Cloudinary;
 public class CloudinaryConfig {
 
 	@Bean
-	public Cloudinary cloudinary() {
+	 Cloudinary cloudinary() {
+		
+		Dotenv dotenv = Dotenv.load();
+		
+		String cloudName = dotenv.get("CLOUDINARY_CLOUD_NAME");
+		String apiKey = dotenv.get("CLOUDINARY_API_KEY");
+		String apiSecret = dotenv.get("CLOUDINARY_API_SECRET");
+		
+		//Validamos
+		if(cloudName == null || apiKey == null || apiSecret == null) {
+			throw new RuntimeException("Faltan variables de entorno de Cloudinary");
+		}
+				
 		Map<String,String> config = new HashMap<>();
 		
-		config.put("cloud_name", "dt61zf586");
-		config.put("api_key", "292826847819869");
-		config.put("api_secret", "C_ytJEoHhkTDTL1rxh4E_7Sd2GM");
+		config.put("cloud_name",cloudName);
+		config.put("api_key", apiKey);
+		config.put("api_secret", apiSecret);
+		
+		
 		
 		return new Cloudinary(config);
 	}
